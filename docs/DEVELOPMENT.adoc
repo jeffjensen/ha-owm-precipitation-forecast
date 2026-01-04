@@ -1,0 +1,298 @@
+= Development Guide
+:toc:
+
+== Setting Up Development Environment
+
+=== Prerequisites
+
+* Python 3.11 or 3.12
+* pip and virtualenv
+* git
+* Home Assistant (for integration testing)
+* OpenWeatherMap API key (for testing)
+
+=== Initial Setup
+
+[source,bash]
+----
+# Clone the repository
+git clone https://github.com/yourusername/ha-owm-precipitation-forecast.git
+cd ha-owm-precipitation-forecast
+
+# Create virtual environment
+python -m venv venv
+Activate venv:
+  Linux: source venv/bin/activate
+  Windows: venv\Scripts\activate
+
+# Install development dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements_test.txt
+
+# Install the package in editable mode
+pip install -e .
+----
+
+=== Project Structure
+
+[source]
+----
+ha-owm-precipitation-forecast/
+├── custom_components/
+│   └── ha_owm_precipitation_forecast/
+│       ├── __init__.py                 # Integration entry point
+│       ├── const.py                    # Constants and configuration
+│       ├── config_flow.py              # UI configuration
+│       ├── coordinator.py              # Data coordinator
+│       ├── owm_client.py               # API client
+│       ├── precipitation_calculator.py # Calculation logic
+│       ├── sensor.py                   # Sensor entities
+│       ├── manifest.json               # Integration metadata
+│       ├── strings.json                # UI strings
+│       └── translations/
+│           └── en.json                 # English translations
+├── tests/
+│   ├── conftest.py                     # Test fixtures
+│   ├── test_init.py                    # Setup tests
+│   ├── test_config_flow.py             # Config flow tests
+│   ├── test_coordinator.py             # Coordinator tests
+│   ├── test_owm_client.py              # API client tests
+│   ├── test_precipitation_calculator.py # Calculator tests
+│   └── test_sensor.py                  # Sensor tests
+├── docs/
+│   ├── DEVELOPMENT.adoc                # This file
+│   ├── BUILD.adoc                      # Build instructions
+│   ├── TESTING.adoc                    # Testing guide
+│   └── CONFIGURATION.adoc              # Configuration details
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                      # CI pipeline
+│       ├── release.yml                 # Release automation
+│       └── validate.yml                # Validation checks
+├── README.adoc                         # Main documentation
+├── LICENSE                             # MIT license
+├── pyproject.toml                      # Project configuration
+├── setup.py                            # Package setup
+└── requirements_test.txt               # Test dependencies
+----
+
+== Development Workflow
+
+=== Running Tests
+
+[source,bash]
+----
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run with coverage
+pytest --cov=custom_components/ha_owm_precipitation_forecast
+
+# Generate HTML coverage report
+pytest --cov --cov-report=html
+open htmlcov/index.html
+
+# Run specific test file
+pytest tests/test_owm_client.py
+
+# Run specific test
+pytest tests/test_owm_client.py::test_client_success
+----
+
+=== Code Quality
+
+[source,bash]
+----
+# Format code with Black
+black custom_components/ha_owm_precipitation_forecast tests
+
+# Sort imports with isort
+isort custom_components/ha_owm_precipitation_forecast tests
+
+# Type checking with mypy
+mypy custom_components/ha_owm_precipitation_forecast
+
+# Linting with pylint
+pylint custom_components/ha_owm_precipitation_forecast
+
+# Security check with bandit
+bandit -r custom_components/ha_owm_precipitation_forecast
+----
+
+=== Testing in Home Assistant
+
+==== Option 1: Symlink (Development)
+
+[source,bash]
+----
+# Create symlink to your development directory
+ln -s $(pwd)/custom_components/ha_owm_precipitation_forecast \
+      ~/.homeassistant/custom_components/ha_owm_precipitation_forecast
+
+# Restart Home Assistant
+# Changes will be reflected after restart
+----
+
+==== Option 2: Copy (Testing)
+
+[source,bash]
+----
+# Copy to Home Assistant
+cp -r custom_components/ha_owm_precipitation_forecast \
+      ~/.homeassistant/custom_components/
+
+# Restart Home Assistant
+----
+
+==== Monitoring Logs
+
+[source,bash]
+----
+# Tail Home Assistant logs
+tail -f ~/.homeassistant/home-assistant.log
+
+# Filter for integration logs
+tail -f ~/.homeassistant/home-assistant.log | grep ha_owm_precipitation_forecast
+
+# Enable debug logging in configuration.yaml
+logger:
+  default: info
+  logs:
+    custom_components.ha_owm_precipitation_forecast: debug
+----
+
+== Making Changes
+
+=== Feature Development
+
+1. Create a feature branch:
++
+[source,bash]
+----
+git checkout -b feature/my-new-feature
+----
+
+2. Make your changes
+3. Add tests for new functionality
+4. Run tests and quality checks
+5. Commit with clear messages:
++
+[source,bash]
+----
+git commit -m "feat: add precipitation probability sensor"
+----
+
+6. Push and create pull request
+
+=== Bug Fixes
+
+1. Create a bugfix branch:
++
+[source,bash]
+----
+git checkout -b fix/issue-123
+----
+
+2. Fix the issue
+3. Add regression tests
+4. Verify fix with tests
+5. Commit and push
+
+=== Commit Message Convention
+
+Use conventional commits:
+
+* `feat:` New feature
+* `fix:` Bug fix
+* `docs:` Documentation changes
+* `test:` Adding or updating tests
+* `refactor:` Code refactoring
+* `chore:` Maintenance tasks
+
+== Debugging
+
+=== Using Python Debugger
+
+[source,python]
+----
+# Add breakpoint in code
+import pdb; pdb.set_trace()
+
+# Or use built-in breakpoint (Python 3.7+)
+breakpoint()
+----
+
+=== VS Code Launch Configuration
+
+[source,json]
+----
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Pytest",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "tests/",
+        "-v"
+      ],
+      "console": "integratedTerminal"
+    }
+  ]
+}
+----
+
+== Release Process
+
+1. Update version in:
+   * `custom_components/ha_owm_precipitation_forecast/manifest.json`
+   * `pyproject.toml`
+   * `setup.py`
+
+2. Update CHANGELOG.md
+
+3. Create and push tag:
++
+[source,bash]
+----
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+----
+
+4. GitHub Actions will automatically:
+   * Run tests
+   * Build packages
+   * Create GitHub release
+   * Upload assets
+
+== Best Practices
+
+* Write tests for all new code
+* Maintain test coverage above 90%
+* Use type hints everywhere
+* Follow PEP 8 style guide
+* Document complex logic
+* Keep functions small and focused
+* Use descriptive variable names
+* Handle errors gracefully
+* Log important events
+
+== Resources
+
+* Home Assistant Developer Docs: https://developers.home-assistant.io/
+* OpenWeatherMap API Docs: https://openweathermap.org/api/one-call-3
+* Python asyncio: https://docs.python.org/3/library/asyncio.html
+* pytest Documentation: https://docs.pytest.org/

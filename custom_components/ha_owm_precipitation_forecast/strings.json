@@ -1,0 +1,39 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OpenWeatherMap Precipitation Forecast Setup",
+        "description": "Enter your OpenWeatherMap API key and location details.",
+        "data": {
+          "api_key": "API Key",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "location_name": "Location Name",
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid API key",
+      "cannot_connect": "Cannot connect to OpenWeatherMap",
+      "unknown": "Unknown error occurred"
+    },
+    "abort": {
+      "already_configured": "This location is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "description": "Configure precipitation forecast options",
+        "data": {
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "poll_interval": "Update Interval"
+        }
+      }
+    }
+  }
+}

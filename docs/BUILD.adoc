@@ -1,0 +1,86 @@
+= Build Guide
+:toc:
+
+== Building the Integration
+
+=== Local Build
+
+[source,bash]
+----
+# Install build tools
+pip install build wheel
+
+# Build distribution packages
+python -m build
+
+# Creates:
+# dist/ha-owm-precipitation-forecast-1.0.0.tar.gz
+# dist/ha_owm_precipitation_forecast-1.0.0-py3-none-any.whl
+----
+
+=== Creating Release Package
+
+[source,bash]
+----
+# Create zip for GitHub release
+cd custom_components
+zip -r ../ha-owm-precipitation-forecast-1.0.0.zip ha_owm_precipitation_forecast
+cd ..
+
+# Or create tar.gz
+tar -czf ha-owm-precipitation-forecast-1.0.0.tar.gz \
+    custom_components/ha_owm_precipitation_forecast
+----
+
+== Validation
+
+=== HACS Validation
+
+[source,bash]
+----
+# Using Docker (requires Docker installed)
+docker run --rm -v $(pwd):/github/workspace \
+  ghcr.io/hacs/action:main \
+  --repository . \
+  --category integration
+----
+
+=== Home Assistant Validation
+
+[source,bash]
+----
+# Install hassfest
+pip install homeassistant
+
+# Run validation
+python -m homeassistant.scripts.hassfest \
+  --integration-path custom_components/ha_owm_precipitation_forecast
+----
+
+== Continuous Integration
+
+GitHub Actions automatically:
+
+1. Runs tests on Python 3.11 and 3.12
+2. Checks code quality (pylint, mypy, black)
+3. Validates with HACS and hassfest
+4. Builds release packages
+5. Uploads to GitHub releases
+
+== Local Installation for Testing
+
+[source,bash]
+----
+# Install in development mode
+pip install -e .
+
+# Copy to Home Assistant
+cp -r custom_components/ha_owm_precipitation_forecast \
+      ~/.homeassistant/custom_components/
+
+# Or create symlink for development
+ln -s $(pwd)/custom_components/ha_owm_precipitation_forecast \
+      ~/.homeassistant/custom_components/ha_owm_precipitation_forecast
+
+# Restart Home Assistant
+----
