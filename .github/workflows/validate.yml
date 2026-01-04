@@ -1,0 +1,30 @@
+name: Validate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  schedule:
+    # Run daily at 2am UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  validate:
+    name: Validate with Home Assistant
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: HACS Validation
+      uses: hacs/action@main
+      with:
+        category: integration
+
+    - name: Hassfest Validation
+      uses: home-assistant/actions/hassfest@master
+
+    - name: Check for manifest errors
+      run: |
+        python -c "import json; json.load(open('custom_components/ha_owm_precipitation_forecast/manifest.json'))"
