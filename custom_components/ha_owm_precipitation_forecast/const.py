@@ -1,4 +1,5 @@
 """Constants for OpenWeatherMap Precipitation Forecast integration."""
+
 from __future__ import annotations
 
 import logging
@@ -74,12 +75,12 @@ UOM_CENTIMETERS: Final = "cm"
 
 # Temperature ranges for snow ratio (Fahrenheit)
 SNOW_RATIO_RANGES: Final = {
-    (-float('inf'), 0): 20.0,      # Very cold
-    (0, 10): 18.0,                 # Optimal fluffy
-    (10, 20): 14.0,               # Cold
-    (20, 28): 12.0,               # Cool
-    (28, 32): 8.0,                # Near freezing
-    (32, float('inf')): 0.0,      # Warm (rain)
+    (-float("inf"), 0): 20.0,  # Very cold
+    (0, 10): 18.0,  # Optimal fluffy
+    (10, 20): 14.0,  # Cold
+    (20, 28): 12.0,  # Cool
+    (28, 32): 8.0,  # Near freezing
+    (32, float("inf")): 0.0,  # Warm (rain)
 }
 
 # API rate limiting

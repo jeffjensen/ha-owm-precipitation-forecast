@@ -1,4 +1,5 @@
 """Config flow for OpenWeatherMap Precipitation Forecast."""
+
 from __future__ import annotations
 
 import logging
@@ -50,16 +51,16 @@ class OWMPrecipitationFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     api_key=user_input[CONF_API_KEY],
                     session=session,
                 )
-                
+
                 await service.async_get_forecast(
                     lat=user_input[CONF_LATITUDE],
                     lon=user_input[CONF_LONGITUDE],
                 )
-                
+
                 unique_id = f"{user_input[CONF_LATITUDE]}_{user_input[CONF_LONGITUDE]}"
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_mismatch()
-                
+
                 return self.async_create_entry(
                     title=user_input.get(
                         CONF_LOCATION_NAME,
@@ -71,27 +72,29 @@ class OWMPrecipitationFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.error("Config validation failed: %s", ex)
                 errors["base"] = "invalid_auth"
 
-        data_schema = vol.Schema({
-            vol.Required(CONF_API_KEY): str,
-            vol.Required(
-                CONF_LATITUDE,
-                default=self.hass.config.latitude,
-            ): vol.Range(min=-90, max=90),
-            vol.Required(
-                CONF_LONGITUDE,
-                default=self.hass.config.longitude,
-            ): vol.Range(min=-180, max=180),
-            vol.Required(CONF_LOCATION_NAME, default="Home"): str,
-            vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.In(
-                SCAN_INTERVALS
-            ),
-            vol.Required(CONF_ENABLE_RAIN, default=True): bool,
-            vol.Required(CONF_ENABLE_SNOW, default=True): bool,
-            vol.Required(CONF_SNOW_RATIO, default=DEFAULT_SNOW_RATIO): vol.Range(
-                min=1.0, max=50.0
-            ),
-            vol.Required(CONF_TEMPERATURE_ADJUSTED_RATIO, default=True): bool,
-        })
+        data_schema = vol.Schema(
+            {
+                vol.Required(CONF_API_KEY): str,
+                vol.Required(
+                    CONF_LATITUDE,
+                    default=self.hass.config.latitude,
+                ): vol.Range(min=-90, max=90),
+                vol.Required(
+                    CONF_LONGITUDE,
+                    default=self.hass.config.longitude,
+                ): vol.Range(min=-180, max=180),
+                vol.Required(CONF_LOCATION_NAME, default="Home"): str,
+                vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.In(
+                    SCAN_INTERVALS
+                ),
+                vol.Required(CONF_ENABLE_RAIN, default=True): bool,
+                vol.Required(CONF_ENABLE_SNOW, default=True): bool,
+                vol.Required(CONF_SNOW_RATIO, default=DEFAULT_SNOW_RATIO): vol.Range(
+                    min=1.0, max=50.0
+                ),
+                vol.Required(CONF_TEMPERATURE_ADJUSTED_RATIO, default=True): bool,
+            }
+        )
 
         return self.async_show_form(
             step_id="user",
@@ -120,32 +123,34 @@ class OWMPrecipitationOptionsFlow(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=user_input)
 
         current_data = self.config_entry.data
-        
+
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema({
-                vol.Required(
-                    CONF_SCAN_INTERVAL,
-                    default=current_data.get(
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
                         CONF_SCAN_INTERVAL,
-                        DEFAULT_SCAN_INTERVAL,
-                    ),
-                ): vol.In(SCAN_INTERVALS),
-                vol.Required(
-                    CONF_ENABLE_RAIN,
-                    default=current_data.get(CONF_ENABLE_RAIN, True),
-                ): bool,
-                vol.Required(
-                    CONF_ENABLE_SNOW,
-                    default=current_data.get(CONF_ENABLE_SNOW, True),
-                ): bool,
-                vol.Required(
-                    CONF_SNOW_RATIO,
-                    default=current_data.get(CONF_SNOW_RATIO, DEFAULT_SNOW_RATIO),
-                ): vol.Range(min=1.0, max=50.0),
-                vol.Required(
-                    CONF_TEMPERATURE_ADJUSTED_RATIO,
-                    default=current_data.get(CONF_TEMPERATURE_ADJUSTED_RATIO, True),
-                ): bool,
-            }),
+                        default=current_data.get(
+                            CONF_SCAN_INTERVAL,
+                            DEFAULT_SCAN_INTERVAL,
+                        ),
+                    ): vol.In(SCAN_INTERVALS),
+                    vol.Required(
+                        CONF_ENABLE_RAIN,
+                        default=current_data.get(CONF_ENABLE_RAIN, True),
+                    ): bool,
+                    vol.Required(
+                        CONF_ENABLE_SNOW,
+                        default=current_data.get(CONF_ENABLE_SNOW, True),
+                    ): bool,
+                    vol.Required(
+                        CONF_SNOW_RATIO,
+                        default=current_data.get(CONF_SNOW_RATIO, DEFAULT_SNOW_RATIO),
+                    ): vol.Range(min=1.0, max=50.0),
+                    vol.Required(
+                        CONF_TEMPERATURE_ADJUSTED_RATIO,
+                        default=current_data.get(CONF_TEMPERATURE_ADJUSTED_RATIO, True),
+                    ): bool,
+                }
+            ),
         )

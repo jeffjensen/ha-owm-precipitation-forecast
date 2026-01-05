@@ -1,4 +1,5 @@
 """OpenWeatherMap Precipitation Forecast Integration"""
+
 from __future__ import annotations
 
 import logging
@@ -21,19 +22,19 @@ _LOGGER: logging.Logger = LOGGER
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the integration from a config entry."""
     hass.data.setdefault(DOMAIN, {})
-    
+
     try:
         coordinator = OWMPrecipitationCoordinator(hass, entry)
         await coordinator.async_config_entry_first_refresh()
     except Exception as ex:
         raise ConfigEntryNotReady(f"Failed to connect to OpenWeatherMap: {ex}") from ex
-    
+
     hass.data[DOMAIN][entry.entry_id] = coordinator
-    
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    
+
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
-    
+
     return True
 
 

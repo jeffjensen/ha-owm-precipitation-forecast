@@ -1,4 +1,5 @@
 """Tests for sensor platform."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
@@ -29,16 +30,16 @@ async def test_sensor_setup(hass: HomeAssistant, config_data):
         "last_update": 123,
     }
     coordinator.last_error = None
-    
+
     hass.data[DOMAIN] = {"test": coordinator}
-    
+
     add_entities = AsyncMock()
     entry = MagicMock()
     entry.entry_id = "test"
     entry.data = config_data
-    
+
     await async_setup_entry(hass, entry, add_entities)
-    
+
     assert add_entities.called
 
 
@@ -51,9 +52,9 @@ def test_hourly_rain_sensor():
     coordinator.data = {
         "hourly": [{"rain": 0.1, "timestamp": i} for i in range(24)],
     }
-    
+
     sensor = OWMHourlyRainSensor(coordinator, "Test Location")
-    
+
     assert sensor.name == "Hourly rain"
     assert sensor.native_value == 2.4
     assert sensor.native_unit_of_measurement == "in"
@@ -68,9 +69,9 @@ def test_next24h_snow_sensor():
     coordinator.data = {
         "next24h": {"rain": 1.0, "snow": 5.0},
     }
-    
+
     sensor = OWMNext24hSnowSensor(coordinator, "Test Location")
-    
+
     assert sensor.name == "Next 24h snow"
     assert sensor.native_value == 5.0
 
@@ -82,9 +83,9 @@ def test_health_sensor_ok():
     coordinator.longitude = -74.0
     coordinator.last_error = None
     coordinator.data = {}
-    
+
     sensor = OWMHealthSensor(coordinator, "Test Location")
-    
+
     assert sensor.native_value == "ok"
 
 
@@ -95,7 +96,7 @@ def test_health_sensor_error():
     coordinator.longitude = -74.0
     coordinator.last_error = "API Error"
     coordinator.data = {}
-    
+
     sensor = OWMHealthSensor(coordinator, "Test Location")
-    
+
     assert sensor.native_value == "error"

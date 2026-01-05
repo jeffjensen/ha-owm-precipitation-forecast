@@ -1,4 +1,5 @@
 """OpenWeatherMap API service."""
+
 from __future__ import annotations
 
 import logging
@@ -24,19 +25,17 @@ class OWMWeatherService:
         self.session = session
         self.base_url = "https://api.openweathermap.org/data/3.0"
 
-    async def async_get_forecast(
-        self, lat: float, lon: float
-    ) -> dict[str, Any]:
+    async def async_get_forecast(self, lat: float, lon: float) -> dict[str, Any]:
         """Get forecast data from OpenWeatherMap One Call API 3.0."""
         url = f"{self.base_url}/onecall"
-        
+
         params = {
             "lat": lat,
             "lon": lon,
             "appid": self.api_key,
             "units": "metric",
         }
-        
+
         try:
             async with self.session.get(
                 url,
@@ -58,5 +57,6 @@ class OWMWeatherService:
             raise TimeoutError("Request to OpenWeatherMap API timed out") from ex
         except aiohttp.ClientError as ex:
             raise Exception(f"Network error: {ex}") from ex
+
 
 import asyncio

@@ -1,4 +1,5 @@
 """Sensor platform for OWM Precipitation Forecast."""
+
 from __future__ import annotations
 
 import logging
@@ -46,7 +47,7 @@ async def async_setup_entry(
     """Set up sensor platform."""
     coordinator: OWMPrecipitationCoordinator = hass.data[DOMAIN][entry.entry_id]
     location_name = entry.data[CONF_LOCATION_NAME]
-    
+
     sensors = [
         OWMHourlyRainSensor(coordinator, location_name),
         OWMHourlySnowSensor(coordinator, location_name),
@@ -56,7 +57,7 @@ async def async_setup_entry(
         OWMNext24hSnowSensor(coordinator, location_name),
         OWMHealthSensor(coordinator, location_name),
     ]
-    
+
     async_add_entities(sensors)
 
 
@@ -76,11 +77,11 @@ class OWMPrecipitationBaseSensor(SensorEntity):
         self.coordinator = coordinator
         self.location_name = location_name
         self.sensor_type = sensor_type
-        
+
         self._attr_unique_id = (
             f"{coordinator.latitude}_{coordinator.longitude}_{sensor_type}"
         )
-        
+
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"{coordinator.latitude}_{coordinator.longitude}")},
             name=location_name,
@@ -114,7 +115,7 @@ class OWMHourlyRainSensor(OWMPrecipitationBaseSensor):
         """Return the current value."""
         if not self.coordinator.data:
             return None
-        
+
         total = 0.0
         for hour in self.coordinator.data.get("hourly", []):
             total += hour.get("rain", 0.0)
@@ -150,7 +151,7 @@ class OWMHourlySnowSensor(OWMPrecipitationBaseSensor):
         """Return the current value."""
         if not self.coordinator.data:
             return None
-        
+
         total = 0.0
         for hour in self.coordinator.data.get("hourly", []):
             total += hour.get("snow", 0.0)
@@ -186,7 +187,7 @@ class OWMDailyRainSensor(OWMPrecipitationBaseSensor):
         """Return the current value."""
         if not self.coordinator.data:
             return None
-        
+
         total = 0.0
         for day in self.coordinator.data.get("daily", [])[:1]:
             total += day.get("rain", 0.0)
@@ -222,7 +223,7 @@ class OWMDailySnowSensor(OWMPrecipitationBaseSensor):
         """Return the current value."""
         if not self.coordinator.data:
             return None
-        
+
         total = 0.0
         for day in self.coordinator.data.get("daily", [])[:1]:
             total += day.get("snow", 0.0)
@@ -258,7 +259,7 @@ class OWMNext24hRainSensor(OWMPrecipitationBaseSensor):
         """Return the current value."""
         if not self.coordinator.data:
             return None
-        
+
         return round(self.coordinator.data.get("next24h", {}).get("rain", 0.0), 4)
 
 
@@ -282,7 +283,7 @@ class OWMNext24hSnowSensor(OWMPrecipitationBaseSensor):
         """Return the current value."""
         if not self.coordinator.data:
             return None
-        
+
         return round(self.coordinator.data.get("next24h", {}).get("snow", 0.0), 4)
 
 
@@ -313,6 +314,10 @@ class OWMHealthSensor(OWMPrecipitationBaseSensor):
         """Return health attributes."""
         attrs = {
             "last_error": self.coordinator.last_error,
-            "last_update": self.coordinator.data.get("last_update") if self.coordinator.data else None,
+            "last_update": (
+                self.coordinator.data.get("last_update")
+                if self.coordinator.data
+                else None
+            ),
         }
         return attrs
