@@ -1,0 +1,2 @@
+= ha-owm-precipitation-forecast
+Production-ready Home Assistant integration for OpenWeatherMap precipitation forecasts.
