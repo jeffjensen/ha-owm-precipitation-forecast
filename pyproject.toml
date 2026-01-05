@@ -49,6 +49,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = "--cov=custom_components/ha_owm_precipitation_forecast --cov-report=term-missing"
+pythonpath = ["."]
 
 [tool.mypy]
 python_version = "3.11"
