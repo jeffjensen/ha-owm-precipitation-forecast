@@ -4,10 +4,10 @@
   "codeowners": ["@your-github-username"],
   "config_flow": true,
   "documentation": "https://github.com/your-username/ha-owm-precipitation-forecast",
+  "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/your-username/ha-owm-precipitation-forecast/issues",
   "requirements": [
     "aiohttp>=3.8.0"
   ],
-  "version": "1.0.0",
-  "iot_class": "cloud_polling"
+  "version": "1.0.0"
 }
