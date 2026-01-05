@@ -7,24 +7,24 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
 
 from .const import (
     CONF_API_KEY,
-    CONF_LOCATION_NAME,
-    CONF_SCAN_INTERVAL,
     CONF_ENABLE_RAIN,
     CONF_ENABLE_SNOW,
+    CONF_LOCATION_NAME,
+    CONF_SCAN_INTERVAL,
     CONF_SNOW_RATIO,
     CONF_TEMPERATURE_ADJUSTED_RATIO,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_SNOW_RATIO,
     DOMAIN,
-    SCAN_INTERVALS,
     LOGGER,
+    SCAN_INTERVALS,
 )
 from .weather_service import OWMWeatherService
 

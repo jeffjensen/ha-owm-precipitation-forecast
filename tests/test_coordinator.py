@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from custom_components.ha_owm_precipitation_forecast.coordinator import (
     OWMPrecipitationCoordinator,

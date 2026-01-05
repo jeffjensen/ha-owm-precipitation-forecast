@@ -8,13 +8,13 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from custom_components.ha_owm_precipitation_forecast.const import DOMAIN
 from custom_components.ha_owm_precipitation_forecast.sensor import (
-    async_setup_entry,
+    OWMHealthSensor,
     OWMHourlyRainSensor,
     OWMNext24hSnowSensor,
-    OWMHealthSensor,
+    async_setup_entry,
 )
-from custom_components.ha_owm_precipitation_forecast.const import DOMAIN
 
 
 @pytest.mark.asyncio

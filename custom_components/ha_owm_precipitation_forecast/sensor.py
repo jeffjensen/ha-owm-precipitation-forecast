@@ -7,20 +7,23 @@ from datetime import datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
-    SensorEntity,
     SensorDeviceClass,
+    SensorEntity,
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
 from .const import (
     CONF_LOCATION_NAME,
     DOMAIN,
     ENTITY_PREFIX,
+    HEALTH_STATUS_ERROR,
+    HEALTH_STATUS_OK,
+    HEALTH_STATUS_UNAVAILABLE,
     LOGGER,
     SENSOR_DAILY_RAIN,
     SENSOR_DAILY_SNOW,
@@ -30,9 +33,6 @@ from .const import (
     SENSOR_NEXT24H_RAIN,
     SENSOR_NEXT24H_SNOW,
     UOM_INCHES,
-    HEALTH_STATUS_OK,
-    HEALTH_STATUS_ERROR,
-    HEALTH_STATUS_UNAVAILABLE,
 )
 from .coordinator import OWMPrecipitationCoordinator
 

@@ -6,13 +6,13 @@ import logging
 from datetime import timedelta
 from typing import Any
 
-from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
     CONF_API_KEY,
@@ -21,14 +21,14 @@ from .const import (
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    NAME,
     LOGGER,
-    SCAN_INTERVALS,
     MAX_RETRIES,
+    NAME,
     RETRY_DELAY,
+    SCAN_INTERVALS,
 )
-from .weather_service import OWMWeatherService
 from .snow_calculator import SnowCalculator
+from .weather_service import OWMWeatherService
 
 _LOGGER: logging.Logger = LOGGER
 

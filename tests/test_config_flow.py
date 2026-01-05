@@ -14,8 +14,8 @@ from custom_components.ha_owm_precipitation_forecast.config_flow import (
 from custom_components.ha_owm_precipitation_forecast.const import (
     CONF_API_KEY,
     CONF_LATITUDE,
-    CONF_LONGITUDE,
     CONF_LOCATION_NAME,
+    CONF_LONGITUDE,
     DOMAIN,
 )
 
