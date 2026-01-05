@@ -1,0 +1,67 @@
+= Contributing Guide
+:toc:
+
+== Welcome
+
+Thank you for considering contributing to the OpenWeatherMap Precipitation Forecast integration!
+
+== Code of Conduct
+
+* Be respectful and inclusive
+* Welcome newcomers
+* Focus on constructive feedback
+* Assume good intentions
+
+== How to Contribute
+
+=== Reporting Bugs
+
+1. Check existing issues first
+2. Use bug report template
+3. Include:
+   * Home Assistant version
+   * Integration version
+   * Error logs
+   * Steps to reproduce
+
+=== Suggesting Features
+
+1. Check existing feature requests
+2. Use feature request template
+3. Explain:
+   * Use case
+   * Expected behavior
+   * Alternative approaches
+
+=== Pull Requests
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Add/update tests
+5. Update documentation
+6. Ensure all checks pass
+7. Submit pull request
+
+== Development Setup
+
+See link:DEVELOPMENT.adoc[Development Guide].
+
+== Coding Standards
+
+* Follow Home Assistant conventions
+* Use type hints
+* Write docstrings
+* Add tests for new features
+* Update documentation
+
+== Review Process
+
+1. Automated checks must pass
+2. Code review by maintainer
+3. Address feedback
+4. Merge when approved
+
+== License
+
+By contributing, you agree to license your contributions under the MIT License.

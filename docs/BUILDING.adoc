@@ -1,0 +1,95 @@
+= Building and Packaging
+:toc:
+
+== Build Prerequisites
+
+* Python 3.11+
+* pip
+* build tools
+
+== Local Build
+
+=== Building for Development
+
+[source,bash]
+----
+# Install in development mode
+pip install -e ".[dev]"
+----
+
+=== Building Distribution Package
+
+[source,bash]
+----
+# Install build tools
+pip install build
+
+# Build package
+python -m build
+
+# Output in dist/
+# - ha_owm_precipitation_forecast-1.0.0-py3-none-any.whl
+# - ha_owm_precipitation_forecast-1.0.0.tar.gz
+----
+
+== Creating HACS Package
+
+[source,bash]
+----
+# Create ZIP for HACS
+cd custom_components
+zip -r ../ha-owm-precipitation-forecast.zip ha_owm_precipitation_forecast/
+----
+
+== Build Validation
+
+=== Run Hassfest
+
+[source,bash]
+----
+# Validate integration
+python -m script.hassfest --integration-path custom_components/ha_owm_precipitation_forecast
+----
+
+=== Run HACS Validation
+
+[source,bash]
+----
+# Use HACS action locally
+docker run --rm -v $(pwd):/github/workspace ghcr.io/hacs/action:latest \
+  --category integration
+----
+
+== CI/CD Build
+
+GitHub Actions automatically builds and validates on:
+
+* Every push to main
+* Every pull request
+* Every release tag
+
+=== Manual Workflow Trigger
+
+[source,bash]
+----
+# Trigger CI workflow
+gh workflow run ci.yml
+----
+
+== Troubleshooting
+
+=== Build Failures
+
+*Import errors*: Check `__init__.py` and dependencies
+
+*Missing files*: Verify `MANIFEST.in` includes all necessary files
+
+*Validation errors*: Run hassfest locally first
+
+=== HACS Issues
+
+* Ensure `hacs.json` is valid
+* Verify `manifest.json` has correct structure
+* Check README.adoc renders correctly
+
+---

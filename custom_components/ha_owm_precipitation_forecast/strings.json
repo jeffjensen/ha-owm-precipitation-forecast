@@ -1,0 +1,76 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OpenWeatherMap Precipitation Forecast Setup",
+        "description": "Configure your precipitation forecast integration",
+        "data": {
+          "location_name": "Location Name",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "api_key": "OpenWeatherMap API Key",
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "update_interval": "Update Interval"
+        },
+        "data_description": {
+          "location_name": "A friendly name for this location (e.g., 'Home', 'Cabin')",
+          "latitude": "Latitude coordinate (-90 to 90)",
+          "longitude": "Longitude coordinate (-180 to 180)",
+          "api_key": "Your OpenWeatherMap API key with One Call API 3.0 access",
+          "enable_rain": "Track rain precipitation",
+          "enable_snow": "Track snow precipitation",
+          "update_interval": "How often to fetch new forecast data"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key": "Invalid API key. Please check your OpenWeatherMap API key.",
+      "invalid_coordinates": "Invalid coordinates. Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "cannot_connect": "Cannot connect to OpenWeatherMap API. Please check your internet connection.",
+      "unknown": "An unexpected error occurred. Please try again."
+    },
+    "abort": {
+      "already_configured": "This location is already configured.",
+      "invalid_config": "Invalid configuration provided."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Options",
+        "description": "Adjust your precipitation forecast settings",
+        "data": {
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "update_interval": "Update Interval"
+        },
+        "data_description": {
+          "enable_rain": "Track rain precipitation",
+          "enable_snow": "Track snow precipitation",
+          "update_interval": "How often to fetch new forecast data"
+        }
+      },
+      "snow_ratios": {
+        "title": "Snow Ratio Configuration",
+        "description": "Configure temperature-adjusted snow ratios (liquid to snow depth)",
+        "data": {
+          "below_15": "Below 15°F Ratio",
+          "15_to_20": "15-20°F Ratio",
+          "20_to_25": "20-25°F Ratio",
+          "25_to_30": "25-30°F Ratio",
+          "30_to_32": "30-32°F Ratio",
+          "above_32": "Above 32°F Ratio"
+        },
+        "data_description": {
+          "below_15": "Ratio for very cold, powdery snow (default: 20:1)",
+          "15_to_20": "Ratio for cold, dry snow (default: 18:1)",
+          "20_to_25": "Ratio for moderate snow (default: 15:1)",
+          "25_to_30": "Ratio for warmer snow (default: 12:1)",
+          "30_to_32": "Ratio for wet, heavy snow (default: 10:1)",
+          "above_32": "Ratio above freezing (default: 0:1 - rain only)"
+        }
+      }
+    }
+  }
+}

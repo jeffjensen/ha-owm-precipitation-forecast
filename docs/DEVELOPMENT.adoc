@@ -1,0 +1,277 @@
+= Development Guide
+:toc:
+:toclevels: 3
+
+== Getting Started
+
+=== Prerequisites
+
+* Python 3.11 or 3.12
+* Home Assistant development environment
+* Git
+* Code editor (VS Code recommended)
+
+=== Setting Up Development Environment
+
+1. *Clone the repository*
++
+[source,bash]
+----
+git clone https://github.com/yourusername/ha-owm-precipitation-forecast.git
+cd ha-owm-precipitation-forecast
+----
+
+2. *Create virtual environment*
++
+[source,bash]
+----
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+----
+
+3. *Install dependencies*
++
+[source,bash]
+----
+pip install -e ".[dev]"
+----
+
+4. *Install pre-development tools*
++
+[source,bash]
+----
+# Install Home Assistant CLI for testing
+pip install homeassistant
+----
+
+== Development Workflow
+
+=== Code Structure
+
+----
+ha-owm-precipitation-forecast/
+├── custom_components/
+│   └── ha_owm_precipitation_forecast/
+│       ├── __init__.py           # Integration setup
+│       ├── config_flow.py        # Configuration UI
+│       ├── const.py              # Constants
+│       ├── sensor.py             # Sensor platform
+│       ├── binary_sensor.py      # Health sensor
+│       ├── owm_client.py         # API client
+│       ├── calculator.py         # Precipitation calculations
+│       ├── manifest.json         # Integration metadata
+│       ├── strings.json          # UI strings
+│       └── translations/
+│           └── en.json           # English translations
+├── tests/                        # Test suite
+├── docs/                         # Documentation
+├── .github/workflows/            # CI/CD
+└── pyproject.toml               # Project configuration
+----
+
+=== Making Changes
+
+1. *Create a feature branch*
++
+[source,bash]
+----
+git checkout -b feature/your-feature-name
+----
+
+2. *Make your changes*
+
+3. *Run tests*
++
+[source,bash]
+----
+pytest
+----
+
+4. *Run code quality checks*
++
+[source,bash]
+----
+ruff check .
+black .
+mypy custom_components
+----
+
+5. *Commit and push*
++
+[source,bash]
+----
+git add .
+git commit -m "feat: your feature description"
+git push origin feature/your-feature-name
+----
+
+6. *Create pull request*
+
+== Code Standards
+
+=== Style Guide
+
+* Follow PEP 8
+* Use type hints
+* Maximum line length: 100 characters
+* Use docstrings for all public methods
+* Use SOLID principles
+
+=== Naming Conventions
+
+* *Constants*: UPPER_SNAKE_CASE
+* *Variables/Functions*: lower_snake_case
+* *Classes*: PascalCase
+* *Private methods*: _leading_underscore
+
+=== Documentation
+
+* Use Google-style docstrings
+* Document all public APIs
+* Include examples where helpful
+* Keep AsciiDoc files updated
+
+== Testing
+
+=== Writing Tests
+
+* Place tests in `tests/` directory
+* Name test files `test_*.py`
+* Name test functions `test_*`
+* Use fixtures from `conftest.py`
+* Aim for >90% code coverage
+
+=== Running Tests
+
+[source,bash]
+----
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov
+
+# Run specific test file
+pytest tests/test_sensor.py
+
+# Run specific test
+pytest tests/test_sensor.py::test_sensor_setup
+
+# Run with verbose output
+pytest -v
+
+# Run with debug output
+pytest -s
+----
+
+=== Test Categories
+
+* *Unit tests*: Test individual components
+* *Integration tests*: Test component interactions
+* *Config flow tests*: Test UI configuration
+* *API tests*: Test external API interactions
+
+== Debugging
+
+=== Local Testing with Home Assistant
+
+1. *Link integration to HA config*
++
+[source,bash]
+----
+ln -s $(pwd)/custom_components/ha_owm_precipitation_forecast \
+      ~/.homeassistant/custom_components/
+----
+
+2. *Enable debug logging in configuration.yaml*
++
+[source,yaml]
+----
+logger:
+  default: info
+  logs:
+    custom_components.ha_owm_precipitation_forecast: debug
+----
+
+3. *Restart Home Assistant*
+
+4. *View logs*
++
+[source,bash]
+----
+tail -f ~/.homeassistant/home-assistant.log | grep ha_owm
+----
+
+=== Using VS Code
+
+Recommended extensions:
+
+* Python
+* Pylance
+* YAML
+* AsciiDoc
+
+Launch configuration (`.vscode/launch.json`):
+
+[source,json]
+----
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Pytest",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
+----
+
+== Common Tasks
+
+=== Adding a New Sensor
+
+1. Update `const.py` with entity constants
+2. Add sensor class in `sensor.py`
+3. Update `async_setup_entry` to include new sensor
+4. Add tests in `tests/test_sensor.py`
+5. Update documentation
+
+=== Adding Configuration Option
+
+1. Add constant to `const.py`
+2. Update schema in `config_flow.py`
+3. Add to `strings.json` and translations
+4. Update options flow if needed
+5. Handle option in integration code
+6. Add tests
+7. Update documentation
+
+=== Updating Dependencies
+
+1. Update version in `pyproject.toml`
+2. Run `pip install -e ".[dev]"`
+3. Test thoroughly
+4. Update `requirements.txt` if needed
+
+== Release Process
+
+See link:RELEASING.adoc[Release Guide] for detailed instructions.
+
+== Getting Help
+
+* *Issues*: Open an issue on GitHub
+* *Discussions*: Use GitHub Discussions
+* *Home Assistant Discord*: #devs_custom_components channel
+
+---
