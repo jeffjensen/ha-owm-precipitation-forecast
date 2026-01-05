@@ -1,0 +1,35 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "OWM Precipitation Forecast Setup",
+                "description": "Configure OpenWeatherMap API details.",
+                "data": {
+                    "api_key": "OWM OneCall 3.0 API Key",
+                    "location_name": "Location Name (for Entity ID)",
+                    "latitude": "Latitude",
+                    "longitude": "Longitude",
+                    "polling_interval": "Update Interval"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Configuration Options",
+                "data": {
+                    "polling_interval": "Update Interval",
+                    "enable_rain": "Enable Rain Entities",
+                    "enable_snow": "Enable Snow Entities",
+                    "ratio_34_plus": "Snow Ratio (>= 34°F)",
+                    "ratio_28_34": "Snow Ratio (28-34°F)",
+                    "ratio_20_28": "Snow Ratio (20-28°F)",
+                    "ratio_10_20": "Snow Ratio (10-20°F)",
+                    "ratio_0_10": "Snow Ratio (0-10°F)",
+                    "ratio_neg": "Snow Ratio (< 0°F)"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,16 @@
+= Development Guide
+
+== Setup
+
+1. Clone repository.
+2. Create virtual environment: `python -m venv venv`.
+3. Activate: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows).
+4. Install requirements: `pip install homeassistant pytest pytest-asyncio pytest-homeassistant-custom-component ruff mypy`.
+
+== Linting
+
+Run `ruff check .` to lint code.
+
+== Type Checking
+
+Run `mypy custom_components` to check types.

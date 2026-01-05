@@ -1,0 +1,7 @@
+= Build Guide
+
+Since this is a Python integration, there is no binary build step.
+
+1. Ensure all files are in `custom_components/owm_precipitation_forecast`.
+2. Update `manifest.json` version.
+3. Commit and Tag in git for HACS release.

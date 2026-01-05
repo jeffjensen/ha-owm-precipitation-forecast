@@ -1,0 +1,11 @@
+= Testing Guide
+
+This project uses `pytest`.
+
+== Run Tests
+
+`pytest tests/`
+
+== Coverage
+
+`pytest --cov=custom_components.owm_precipitation_forecast tests/`

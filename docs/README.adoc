@@ -1,0 +1,58 @@
+= OWM Precipitation Forecast Integration
+:toc:
+:icons: font
+
+A high-quality, reliable Home Assistant integration to forecast snow and rain accumulation using OpenWeatherMap OneCall 3.0 data.
+
+== Features
+
+* **Rain & Snow Accumulation:** Separate entities for rain and snow.
+* **Totals:** Next 24 hours, daily, and hourly forecasts.
+* **Snow Accumulation Logic:** Uses temperature-adjusted liquid-to-snow ratios (configurable).
+* **Configurable:** Edit API key, location, and polling intervals via UI.
+* **HACS Ready:** Easy installation.
+* **Unit Support:** Calculates in inches, Home Assistant handles conversion to cm/mm if configured.
+
+== Installation
+
+=== HACS (Recommended)
+
+1. Open HACS.
+2. Go to Integrations > 3 dots > Custom Repositories.
+3. Add `https://github.com/yourusername/ha-owm-precipitation-forecast` as an Integration.
+4. Search for "OWM Precipitation Forecast" and install.
+5. Restart Home Assistant.
+
+=== Manual
+
+1. Download the `custom_components/owm_precipitation_forecast` folder.
+2. Place it in your Home Assistant `config/custom_components/` directory.
+3. Restart Home Assistant.
+
+== Configuration
+
+1. Go to **Settings > Devices & Services**.
+2. Click **Add Integration**.
+3. Search for **OWM Precipitation Forecast**.
+4. Enter your OWM API Key, Location Name, Lat/Lon, and preferred Polling Interval.
+
+=== Options
+
+Click **Configure** on the integration card to adjust:
+
+* Polling Interval.
+* Enable/Disable Rain or Snow sensors.
+* Adjust Snow Ratios for specific temperature bands (e.g., 10:1 vs 20:1).
+
+== Entities
+
+Entities are prefixed with `owm_precipitation_forecast_[location]_`.
+
+* `...rain_next24h`: Total predicted rain for next 24 hours.
+* `...snow_next24h`: Total predicted snow accumulation for next 24 hours.
+* `...rain_hourly`: Next hour rain (attributes contain full forecast).
+* `...snow_hourly`: Next hour snow (attributes contain full forecast).
+
+== Credits
+
+Data provided by OpenWeatherMap.
