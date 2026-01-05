@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 import aiohttp
-from homeassistant.helpers.aiohttp_client import AsyncClientSession
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import (
     API_TIMEOUT,
