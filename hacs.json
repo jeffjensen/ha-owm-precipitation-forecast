@@ -1,0 +1,7 @@
+{
+  "name": "OpenWeatherMap Precipitation Forecast",
+  "homeassistant": "2024.1.0",
+  "hacs": "2.0",
+  "domains": ["sensor"],
+  "iot_class": "cloud_polling"
+}

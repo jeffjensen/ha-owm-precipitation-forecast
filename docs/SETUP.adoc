@@ -1,0 +1,216 @@
+= Setup and Configuration Guide
+:toc: macro
+
+toc::[]
+
+== Installation
+
+=== Option 1: HACS (Recommended)
+
+1. Install HACS: https://hacs.xyz/
+2. In Home Assistant: Settings → Devices & Services → HACS (three dots) → Custom repositories
+3. Add repository: https://github.com/your-username/ha-owm-precipitation-forecast
+4. Select "Integration" category
+5. Click "Install"
+6. Restart Home Assistant
+
+=== Option 2: Manual Installation
+
+1. Clone or download the repository
+2. Copy `custom_components/ha_owm_precipitation_forecast` to your Home Assistant `custom_components` directory
+3. Create custom_components directory if it doesn't exist:
+   ```bash
+   mkdir -p ~/.homeassistant/custom_components
+   ```
+4. Restart Home Assistant
+
+=== Option 3: Development Installation
+
+For development, see <<development-environment>>.
+
+== Initial Configuration
+
+=== Via UI
+
+1. Go to Settings → Devices & Services
+2. Click "+ Create Integration"
+3. Search for "OpenWeatherMap Precipitation Forecast"
+4. Fill in the configuration form:
+
+==== Required Fields
+
+* **API Key**: Your OpenWeatherMap API key
+  - Get free key: https://openweathermap.org/api
+  - No credit card required
+  - 1000 calls/day free tier
+
+* **Latitude**: Location latitude (-90 to 90)
+  - Defaults to Home Assistant configured latitude
+  
+* **Longitude**: Location longitude (-180 to 180)
+  - Defaults to Home Assistant configured longitude
+
+==== Optional Fields
+
+* **Location Name**: Display name (default: "Home")
+* **Update Interval**: How often to fetch data
+  - Options: 15, 30, 60, 240, 480, 720, 1440 minutes
+  - Default: 60 minutes
+  - Note: Free tier OpenWeatherMap allows 1000 calls/day
+
+* **Enable Rain**: Track rain precipitation (default: enabled)
+* **Enable Snow**: Track snow precipitation (default: enabled)
+
+* **Snow Ratio**: Static snow-to-liquid ratio
+  - Default: 10:1
+  - Range: 1:1 to 50:1
+  - Ignored if temperature-adjusted ratios enabled
+
+* **Use Temperature-Adjusted Ratios**: Enable smart ratio selection
+  - Default: enabled
+  - Automatically selects ratio based on forecast temperature
+  - More accurate than fixed ratio
+  - Overrides manual snow ratio setting
+
+=== Via Options
+
+After initial setup, modify settings:
+
+1. Settings → Devices & Services → Select Integration
+2. Click three dots → Options
+3. Modify any setting and save
+
+== Getting an OpenWeatherMap API Key
+
+1. Visit https://openweathermap.org/api
+2. Click "Sign Up" or "Log In"
+3. Choose "Current and Forecast APIs" → "One Call API 3.0"
+4. Free tier: 1000 calls/day
+5. Copy your API key from the API Keys page
+
+Key information:
+* Free tier includes One Call API 3.0
+* 48-hour hourly forecast
+* 8-day daily forecast
+* No credit card required initially
+
+== Entity Naming
+
+Entity IDs follow the pattern:
+
+```
+sensor.owm_precipitation_forecast_{location}_{type}
+```
+
+Examples with location_name = "Home":
+* `sensor.owm_precipitation_forecast_home_hourly_rain`
+* `sensor.owm_precipitation_forecast_home_next24h_snow`
+* `sensor.owm_precipitation_forecast_home_health`
+
+Entity names are customizable in Home Assistant UI:
+Settings → Devices & Services → Entities → Select entity → Edit
+
+== Advanced Configuration
+
+=== Snow Ratio Selection
+
+==== Temperature-Adjusted (Recommended)
+
+Based on meteorological science, different temperatures produce different snow densities:
+
+[cols="1,2,3"]
+|===
+|Temperature Range|Ratio|Snow Type
+
+|-18°C or colder|20:1|Very light, powdery
+|-18 to -12°C|18:1|Optimal powder
+|-12 to -7°C|14:1|Light snow
+|-7 to -2°C|12:1|Average snow
+|-2 to 0°C|8:1|Wet, heavy snow
+|Above 0°C|0:1|Rain only
+|===
+
+Enable in options: "Use Temperature-Adjusted Ratios"
+
+==== Fixed Ratio
+
+Use constant ratio for consistency:
+1. Disable "Use Temperature-Adjusted Ratios"
+2. Set "Snow Ratio" to desired value
+3. Common values:
+   - 10:1 - NOAA average
+   - 12:1 - Midwest average
+   - 15:1 - Dry regions
+   - 5:1 - Wet, coastal regions
+
+=== Polling Interval
+
+Choose based on needs and API quota:
+
+[cols="1,1,2"]
+|===
+|Interval|Daily Calls|Best For
+
+|15 minutes|96|Real-time alerts, active monitoring
+|30 minutes|48|Short-term forecasts
+|60 minutes (default)|24|Typical home automation
+|4 hours|6|Low quota, archived location
+|8 hours|3|Minimal updates, research
+|24 hours|1|Experimental only
+|===
+
+Default 60-minute interval: 720 calls/month (well within free tier)
+
+== Troubleshooting
+
+=== Entity Not Appearing
+
+1. Reload integration: Settings → Devices & Services → Select → Reload
+2. Restart Home Assistant
+3. Check logs: Settings → System → Logs → "ha_owm_precipitation_forecast"
+
+=== Invalid API Key Error
+
+1. Verify API key from https://openweathermap.org/api/account/keys
+2. Ensure key is for One Call API 3.0, not other products
+3. Try regenerating key if old
+4. Check if account is active (check email for activation)
+
+=== No Data in Sensors
+
+1. Check health sensor: `sensor.owm_precipitation_forecast_health`
+2. If "error": check logs for detailed error message
+3. Verify location coordinates are correct
+4. Test coordinates: https://openweathermap.org/find
+5. Wait up to configured poll interval for first update
+
+=== Snow Values Seem Wrong
+
+1. Verify temperature-adjusted ratios are enabled (more accurate)
+2. If disabled, adjust base snow ratio to match your region
+3. Check that temperature data is being received
+4. Review selected ratio logic for your temperature range
+
+== Multiple Locations
+
+Create multiple integrations for different locations:
+
+1. Settings → Devices & Services → Create Integration
+2. Select "OpenWeatherMap Precipitation Forecast"
+3. Use different location coordinates
+4. Use different location names (e.g., "Home", "Office", "Cabin")
+5. Repeat for each location
+
+Each location gets its own set of sensors with unique names.
+
+[[development-environment]]
+== Development Environment
+
+See link:SETUP.adoc[SETUP.adoc] in the docs folder.
+
+== Getting Help
+
+* Check integration health sensor first
+* Review Home Assistant logs
+* Search GitHub issues: https://github.com/your-username/ha-owm-precipitation-forecast/issues
+* Start a discussion: https://github.com/your-username/ha-owm-precipitation-forecast/discussions

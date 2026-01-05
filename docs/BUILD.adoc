@@ -1,0 +1,220 @@
+= Build and Release Guide
+:toc: macro
+
+toc::[]
+
+== Build System
+
+The project uses standard Python build tools with GitHub Actions CI/CD.
+
+=== Local Build
+
+==== Prerequisites
+
+* Python 3.11+
+* pip and virtualenv
+* Home Assistant (for validation)
+
+==== Steps
+
+1. Clone repository:
+   ```bash
+   git clone https://github.com/your-username/ha-owm-precipitation-forecast.git
+   cd ha-owm-precipitation-forecast
+   ```
+
+2. Create virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+
+4. Run validation:
+   ```bash
+   python -m pytest
+   black --check custom_components
+   isort --check-only custom_components
+   flake8 custom_components
+   pylint custom_components
+   mypy custom_components
+   ```
+
+== Continuous Integration
+
+GitHub Actions automatically:
+* Validates with hassfest
+* Runs test suite
+* Checks code quality
+* Generates coverage reports
+
+Workflow files: `.github/workflows/`
+
+=== Hassfest Validation
+
+Ensures manifest.json and integration structure are valid:
+```bash
+python -m script.hassfest
+```
+
+=== Test Coverage
+
+Minimum 80% coverage required:
+```bash
+pytest --cov=custom_components --cov-report=html
+```
+
+View coverage: `htmlcov/index.html`
+
+== Release Process
+
+=== Manual Release
+
+1. Update version in:
+   * `custom_components/ha_owm_precipitation_forecast/manifest.json`
+   * `pyproject.toml`
+   * Update `CHANGELOG.md` (if exists)
+
+2. Run tests and linting locally:
+   ```bash
+   pytest
+   black custom_components
+   isort custom_components
+   flake8 custom_components
+   pylint custom_components
+   mypy custom_components
+   ```
+
+3. Commit changes:
+   ```bash
+   git add .
+   git commit -m "Release v1.0.1"
+   ```
+
+4. Create tag:
+   ```bash
+   git tag v1.0.1
+   git push origin --tags
+   ```
+
+5. GitHub Actions automatically creates release
+
+=== Automated Release
+
+Release workflow (`.github/workflows/release.yaml`) triggers on tag creation:
+* Runs full test suite
+* Runs all linting checks
+* Creates GitHub release
+* Publishes to HACS
+
+== Version Management
+
+Follow Semantic Versioning: MAJOR.MINOR.PATCH
+
+* MAJOR: Breaking changes
+* MINOR: New features (backward compatible)
+* PATCH: Bug fixes
+
+Example: v1.2.3
+
+== Code Quality Tools
+
+=== Black (Code Formatting)
+
+```bash
+black custom_components tests
+```
+
+=== isort (Import Sorting)
+
+```bash
+isort custom_components tests
+```
+
+=== Flake8 (Linting)
+
+```bash
+flake8 custom_components tests
+```
+
+=== Pylint (Code Analysis)
+
+```bash
+pylint custom_components
+```
+
+=== mypy (Type Checking)
+
+```bash
+mypy custom_components
+```
+
+All tools configured in `pyproject.toml` and `setup.cfg`.
+
+== Project Structure
+
+```
+ha-owm-precipitation-forecast/
+├── custom_components/
+│   └── ha_owm_precipitation_forecast/
+│       ├── __init__.py
+│       ├── const.py
+│       ├── config_flow.py
+│       ├── coordinator.py
+│       ├── weather_service.py
+│       ├── snow_calculator.py
+│       ├── sensor.py
+│       ├── manifest.json
+│       └── strings/
+│           └── en.json
+├── tests/
+│   ├── conftest.py
+│   ├── test_config_flow.py
+│   ├── test_coordinator.py
+│   ├── test_snow_calculator.py
+│   └── test_sensor.py
+├── docs/
+│   ├── README.adoc
+│   ├── SETUP.adoc
+│   ├── BUILD.adoc
+│   └── TESTING.adoc
+├── .github/workflows/
+│   ├── hassfest.yaml
+│   ├── tests.yaml
+│   ├── python-linting.yaml
+│   └── release.yaml
+├── .gitignore
+├── hacs.json
+├── LICENSE
+├── README.md
+├── pyproject.toml
+├── requirements.txt
+└── requirements-dev.txt
+```
+
+== Distribution
+
+=== HACS
+
+The integration is automatically discoverable on HACS once:
+1. Repository is public
+2. Has at least one release/tag
+3. Has valid `manifest.json`
+4. Has valid `hacs.json`
+5. Has README.md
+
+Users can find it: HACS → Integrations → Search "OpenWeatherMap Precipitation"
+
+=== GitHub
+
+Releases available at:
+https://github.com/your-username/ha-owm-precipitation-forecast/releases
+
+=== Home Assistant Community
+
+Share on: https://community.home-assistant.io/
+Category: Integrations

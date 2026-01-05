@@ -1,0 +1,361 @@
+= Testing Guide
+:toc: macro
+
+toc::[]
+
+== Overview
+
+The project uses pytest for comprehensive unit and integration testing with >80% code coverage.
+
+=== Test Framework
+
+* **pytest**: Main testing framework
+* **pytest-asyncio**: Async test support
+* **pytest-homeassistant-custom-component**: Home Assistant test utilities
+* **pytest-cov**: Coverage reporting
+
+== Running Tests
+
+=== Quick Start
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=custom_components/ha_owm_precipitation_forecast
+
+# Run specific test file
+pytest tests/test_coordinator.py
+
+# Run specific test function
+pytest tests/test_coordinator.py::test_coordinator_initialization
+```
+
+=== Coverage Report
+
+```bash
+# Terminal report
+pytest --cov=custom_components --cov-report=term-missing
+
+# HTML report
+pytest --cov=custom_components --cov-report=html
+# Open htmlcov/index.html in browser
+```
+
+=== Verbose Output
+
+```bash
+# Show print statements and detailed output
+pytest -vv
+
+# Show slowest 10 tests
+pytest --durations=10
+
+# Stop on first failure
+pytest -x
+```
+
+== Test Organization
+
+=== Test Files
+
+[cols="1,2"]
+|===
+|File|Coverage
+
+|`test_config_flow.py`|Configuration and options flow
+|`test_coordinator.py`|Data fetching and coordination
+|`test_snow_calculator.py`|Snow ratio calculations
+|`test_sensor.py`|Sensor entity platform
+|===
+
+=== Test Structure
+
+Each test file follows pattern:
+
+```python
+import pytest
+from unittest.mock import AsyncMock, patch
+
+@pytest.mark.asyncio
+async def test_feature_description():
+    """Test that a feature works correctly."""
+    # Arrange: Set up test data and mocks
+    mock_data = {...}
+    
+    # Act: Execute the code being tested
+    result = await function_under_test(mock_data)
+    
+    # Assert: Verify the result
+    assert result.value == expected
+```
+
+== Writing Tests
+
+=== Basic Test Example
+
+```python
+def test_snow_calculation():
+    """Test snow calculation from precipitation."""
+    calculator = SnowCalculator(base_ratio=10.0)
+    
+    result = calculator.calculate_snow(1.0, 0)  # 1 inch rain at 0°C
+    
+    assert result == 10.0
+```
+
+=== Async Test Example
+
+```python
+@pytest.mark.asyncio
+async def test_async_operation():
+    """Test async operation."""
+    mock_service = AsyncMock()
+    mock_service.async_get_data = AsyncMock(return_value={"value": 123})
+    
+    result = await mock_service.async_get_data()
+    
+    assert result["value"] == 123
+```
+
+=== Fixture Usage
+
+```python
+@pytest.mark.asyncio
+async def test_with_coordinator(config_data, mock_owm_response):
+    """Test using fixtures."""
+    entry = AsyncMock()
+    entry.data = config_data
+    
+    coordinator = OWMPrecipitationCoordinator(hass, entry)
+    
+    assert coordinator.latitude == config_data["latitude"]
+```
+
+== Fixtures
+
+=== Available Fixtures
+
+[cols="1,2"]
+|===
+|Fixture|Purpose
+
+|`hass`|Home Assistant instance
+|`config_data`|Standard test configuration
+|`mock_owm_response`|Mock OpenWeatherMap API response
+|`mock_weather_service`|Mocked weather service
+|===
+
+=== Custom Fixtures
+
+Define in `conftest.py`:
+
+```python
+@pytest.fixture
+def my_fixture():
+    """Describe what this fixture provides."""
+    return setup_data()
+
+@pytest.fixture
+async def async_fixture():
+    """Async fixture."""
+    data = await async_setup()
+    yield data
+    await cleanup()
+```
+
+== Mocking
+
+=== Mock OpenWeatherMap API
+
+```python
+with patch(
+    "custom_components.ha_owm_precipitation_forecast.coordinator.OWMWeatherService"
+) as mock_service_class:
+    mock_service = AsyncMock()
+    mock_service.async_get_forecast = AsyncMock(return_value=mock_owm_response)
+    mock_service_class.return_value = mock_service
+    
+    # Test code here
+```
+
+=== Mock Home Assistant
+
+```python
+entry = AsyncMock()
+entry.data = config_data
+entry.entry_id = "test_entry_id"
+
+hass.data[DOMAIN] = {entry.entry_id: coordinator}
+```
+
+== Test Coverage
+
+=== Current Coverage
+
+Target: >80% overall coverage
+
+Run coverage:
+```bash
+pytest --cov=custom_components/ha_owm_precipitation_forecast --cov-report=term-missing
+```
+
+View in HTML:
+```bash
+pytest --cov=custom_components/ha_owm_precipitation_forecast --cov-report=html
+open htmlcov/index.html
+```
+
+=== Coverage Goals by Module
+
+[cols="1,1"]
+|===
+|Module|Target
+
+|const.py|100% (constants only)
+|config_flow.py|85%
+|coordinator.py|85%
+|weather_service.py|80%
+|snow_calculator.py|95%
+|sensor.py|80%
+|===
+
+== Edge Cases and Scenarios
+
+=== API Error Handling
+
+```python
+@pytest.mark.asyncio
+async def test_api_error():
+    """Test handling of API errors."""
+    with patch(...) as mock:
+        mock.async_get_forecast = AsyncMock(
+            side_effect=Exception("API Error")
+        )
+        
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+```
+
+=== Missing Data
+
+```python
+def test_missing_precipitation():
+    """Test handling of missing data."""
+    sensor = OWMHourlyRainSensor(coordinator, "Test")
+    coordinator.data = {"hourly": []}
+    
+    assert sensor.native_value == 0.0
+```
+
+=== Configuration Validation
+
+```python
+@pytest.mark.asyncio
+async def test_invalid_coordinates():
+    """Test invalid coordinates."""
+    config = {...}
+    config["latitude"] = 91  # Invalid
+    
+    result = await config_flow.async_step_user(config)
+    
+    assert "errors" in result
+```
+
+== Continuous Integration
+
+Tests run automatically on:
+* Every push to main/develop
+* Pull requests
+* Daily schedule (midnight UTC)
+
+GitHub Actions workflow: `.github/workflows/tests.yaml`
+
+=== CI Requirements
+
+All must pass:
+* ✓ pytest (all tests pass)
+* ✓ pytest coverage (>80%)
+* ✓ hassfest (manifest validation)
+* ✓ black (code formatting)
+* ✓ isort (import sorting)
+* ✓ flake8 (linting)
+* ✓ pylint (code analysis)
+* ✓ mypy (type checking)
+
+== Debugging Tests
+
+=== Print Debugging
+
+```python
+@pytest.mark.asyncio
+async def test_with_debug():
+    """Debug test output."""
+    print(f"Debug value: {variable}")  # Shows in pytest -vv
+    assert condition
+```
+
+=== Using pdb
+
+```python
+@pytest.mark.asyncio
+async def test_with_breakpoint():
+    """Debug with breakpoint."""
+    result = await function()
+    breakpoint()  # Stops here, inspect with pdb commands
+    assert result.value == expected
+```
+
+=== Detailed Output
+
+```bash
+pytest -vv -s
+```
+
+== Performance
+
+=== Run Tests Quickly
+
+```bash
+# Disable coverage for speed
+pytest --no-cov
+
+# Run only fast tests (exclude slow)
+pytest -m "not slow"
+
+# Run tests in parallel (requires pytest-xdist)
+pytest -n auto
+```
+
+=== Benchmark Tests
+
+```python
+@pytest.mark.slow
+def test_performance():
+    """Test that snow calculation is fast."""
+    calculator = SnowCalculator()
+    
+    start = time.time()
+    for _ in range(1000):
+        calculator.calculate_snow(1.0, 0)
+    elapsed = time.time() - start
+    
+    assert elapsed < 0.1  # Less than 100ms for 1000 calcs
+```
+
+== Best Practices
+
+1. **Test behavior, not implementation**: Focus on what, not how
+2. **One assertion per test** (when possible): Easier to debug failures
+3. **Descriptive names**: Test name should explain what it tests
+4. **Use fixtures**: Reduce duplication
+5. **Mock external services**: Don't call real APIs in tests
+6. **Async tests**: Always use `@pytest.mark.asyncio`
+7. **Cleanup**: Use pytest fixtures for setup/teardown
+
+== Resources
+
+* Pytest docs: https://docs.pytest.org/
+* Home Assistant testing: https://developers.home-assistant.io/docs/development_testing/
+* unittest.mock: https://docs.python.org/3/library/unittest.mock.html

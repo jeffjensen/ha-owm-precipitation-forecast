@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OpenWeatherMap Precipitation Forecast",
+        "description": "Configure OpenWeatherMap API for precipitation forecasting",
+        "data": {
+          "api_key": "API Key",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "location_name": "Location Name",
+          "scan_interval": "Update Interval (minutes)",
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "snow_ratio": "Snow Ratio (default: 10:1)",
+          "temperature_adjusted_ratio": "Use Temperature-Adjusted Snow Ratios"
+        },
+        "data_description": {
+          "api_key": "OpenWeatherMap API key (free tier available)",
+          "latitude": "Latitude of location",
+          "longitude": "Longitude of location",
+          "location_name": "Display name for this location",
+          "scan_interval": "How often to fetch new data",
+          "enable_rain": "Track rain precipitation",
+          "enable_snow": "Track and calculate snow",
+          "snow_ratio": "Inches of snow per inch of liquid (10:1 default)",
+          "temperature_adjusted_ratio": "Adjust snow ratio based on temperature"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid API key or location",
+      "unknown": "Unknown error occurred"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Update Options",
+        "description": "Configure integration options",
+        "data": {
+          "scan_interval": "Update Interval (minutes)",
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "snow_ratio": "Snow Ratio (10:1 default)",
+          "temperature_adjusted_ratio": "Use Temperature-Adjusted Ratios"
+        }
+      }
+    }
+  }
+}
