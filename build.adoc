@@ -1,0 +1,3 @@
+= Building the Integration
+
+No build needed; it's Python. For release, use GitHub Actions.

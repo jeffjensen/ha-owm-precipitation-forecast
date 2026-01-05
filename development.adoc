@@ -1,0 +1,7 @@
+= Setting Up Development Environment
+
+1. Clone the repo.
+2. Install Home Assistant dev environment.
+3. Link the custom_components folder to HA's custom_components.
+4. Install dev deps: pip install pytest pytest-homeassistant-custom-component aiohttp pytest-cov pylint flake8 black
+5. Configure integration in HA.

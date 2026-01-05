@@ -1,0 +1,36 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OWM Precipitation Forecast",
+        "description": "Enter your OWM details.",
+        "data": {
+          "api_key": "API Key",
+          "location_name": "Location Name",
+          "latitude": "Latitude",
+          "longitude": "Longitude"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key": "Invalid API key",
+      "cannot_connect": "Cannot connect to OWM"
+    },
+    "abort": {
+      "already_configured": "Already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "data": {
+          "enable_rain": "Enable Rain",
+          "enable_snow": "Enable Snow",
+          "poll_interval": "Poll Interval",
+          "snow_ratios": "Snow Ratios (min:max:ratio,...)"
+        }
+      }
+    }
+  }
+}

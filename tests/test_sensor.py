@@ -1,0 +1,1 @@
+# Similar tests for sensors, checking state, attributes, etc.

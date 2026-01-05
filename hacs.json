@@ -1,0 +1,11 @@
+{
+  "name": "OWM Precipitation Forecast",
+  "domains": ["sensor"],
+  "country": "US",
+  "homeassistant": "2024.1.0",
+  "render_readme": true,
+  "zip_release": true,
+  "filename": null,
+  "content_in_root": false,
+  "hacs": "1.0.0"
+}

@@ -1,0 +1,64 @@
+= OWM Precipitation Forecast Integration for Home Assistant
+
+This integration provides precipitation forecast data for rain and snow using OpenWeatherMap (OWM) API. It creates sensors for hourly, daily, and next 24-hour totals, with configurable options for polling, enabling/disabling rain/snow, and temperature-adjusted snow ratios.
+
+== Features
+
+- Hourly, daily, and next 24-hour precipitation forecasts for rain and snow.
+- Configurable polling intervals.
+- Temperature-adjusted snow accumulation using configurable ratios.
+- UI configuration via Home Assistant's integration setup.
+- Health sensor for monitoring integration status.
+- Units in inches (in).
+- No historical data; only forecasts.
+
+== Installation
+
+=== HACS
+
+1. Open HACS in Home Assistant.
+2. Go to "Integrations".
+3. Click "Explore & Download Repositories".
+4. Search for "OWM Precipitation Forecast".
+5. Install the integration.
+6. Restart Home Assistant.
+
+=== Manual
+
+1. Download the latest release zip from GitHub.
+2. Extract to `custom_components/ha_owm_precipitation_forecast`.
+3. Restart Home Assistant.
+
+== Configuration
+
+Add the integration via Home Assistant UI:
+
+- Go to Settings > Devices & Services > Add Integration.
+- Search for "OWM Precipitation Forecast".
+- Enter OWM API key, location name, latitude, longitude.
+
+Options (configurable after setup):
+
+- Enable/disable rain and snow.
+- Polling interval (15 min, 30 min, 1 hour, etc.).
+- Snow ratio configuration (string format: "min_temp:max_temp:ratio,..." in °F, e.g., "-inf:15:20,15:25:15,25:inf:10").
+
+== Entities
+
+- `sensor.owm_precipitation_forecast_<location>_rain_hourly`: Attributes with list of {"datetime": str, "precipitation": float} for next 48 hours.
+- `sensor.owm_precipitation_forecast_<location>_rain_daily`: Similar for next 7 days.
+- `sensor.owm_precipitation_forecast_<location>_rain_next24h`: Total rain in next 24 hours.
+- Similarly for snow.
+- `sensor.owm_precipitation_forecast_<location>_health`: Health status.
+
+== Requirements
+
+- OpenWeatherMap API key (free tier sufficient).
+
+== License
+
+MIT
+
+== Support
+
+Issues on GitHub.

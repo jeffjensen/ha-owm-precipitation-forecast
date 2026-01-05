@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install homeassistant pytest pytest-homeassistant-custom-component aiohttp pytest-cov pylint flake8 black hassfest hacs
+      - name: Run hassfest
+        run: hassfest --action validate --requirements custom_components/ha_owm_precipitation_forecast
+      - name: Run HACS validation
+        run: hacs integration --ref ${{ github.sha }} --action validate
+      - name: Lint with pylint
+        run: pylint custom_components/ha_owm_precipitation_forecast
+      - name: Lint with flake8
+        run: flake8 custom_components/ha_owm_precipitation_forecast
+      - name: Check with black
+        run: black --check custom_components/ha_owm_precipitation_forecast
+      - name: Run tests
+        run: pytest tests/ --cov=custom_components/ha_owm_precipitation_forecast --cov-report=term-missing
+
+  release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false

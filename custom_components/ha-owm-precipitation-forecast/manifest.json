@@ -1,0 +1,12 @@
+{
+  "domain": "ha_owm_precipitation_forecast",
+  "name": "OWM Precipitation Forecast",
+  "version": "1.0.0",
+  "documentation": "https://github.com/yourusername/ha-owm-precipitation-forecast/README.adoc",
+  "issue_tracker": "https://github.com/yourusername/ha-owm-precipitation-forecast/issues",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@yourusername"],
+  "config_flow": true,
+  "iot_class": "cloud_polling"
+}

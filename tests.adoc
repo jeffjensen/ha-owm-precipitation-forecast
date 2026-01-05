@@ -1,0 +1,5 @@
+= Running Tests
+
+Run `pytest tests/` for tests.
+
+With coverage: `pytest --cov=custom_components/ha_owm_precipitation_forecast tests/`
