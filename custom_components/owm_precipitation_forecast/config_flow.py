@@ -7,7 +7,7 @@ from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
@@ -15,9 +15,9 @@ from .const import (
     CONF_LOCATION_NAME,
     DOMAIN,
     ERROR_ALREADY_CONFIGURED,
-    ERROR_CANNOT_CONNECT,
+    # ERROR_CANNOT_CONNECT,
     ERROR_INVALID_API_KEY,
-    ERROR_INVALID_LOCATION,
+    # ERROR_INVALID_LOCATION,
 )
 
 
