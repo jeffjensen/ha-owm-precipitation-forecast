@@ -10,10 +10,9 @@ from __future__ import annotations
 import logging
 from typing import Final
 
+from const import DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-
-from .const import DOMAIN
 
 _LOGGER: Final = logging.getLogger(__name__)
 
