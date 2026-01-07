@@ -38,9 +38,9 @@
           "enable_rain": "Enable rain forecast",
           "enable_snow": "Enable snow forecast",
           "polling_interval_minutes": "Polling interval (minutes)",
-          "cold_temp_threshold": "Cold temperature threshold (�F)",
+          "cold_temp_threshold": "Cold temperature threshold (F)",
           "cold_temp_ratio": "Cold temperature snow ratio (cold:1)",
-          "warm_temp_threshold": "Warm temperature threshold (�F)",
+          "warm_temp_threshold": "Warm temperature threshold (F)",
           "warm_temp_ratio": "Warm temperature snow ratio (warm:1)"
         },
         "data_description": {
