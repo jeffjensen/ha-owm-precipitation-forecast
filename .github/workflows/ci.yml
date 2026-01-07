@@ -13,6 +13,6 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pytest pytest-cov ruff mypy
-      - run: ruff custom_components
+      - run: ruff check custom_components
       - run: mypy custom_components
       - run: pytest --cov=custom_components
