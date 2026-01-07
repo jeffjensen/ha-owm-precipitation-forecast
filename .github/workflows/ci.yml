@@ -75,3 +75,5 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+# TEMP remove this after registering this integration as a brand w/HA
+          ignore: brands
