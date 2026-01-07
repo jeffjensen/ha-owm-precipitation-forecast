@@ -7,7 +7,7 @@ from .owm_client import OWMClient
 
 _LOGGER = logging.getLogger(__name__)
 
-class OWMForecastCoordinator(DataUpdateCoordinator) -> bool:
+class OWMForecastCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, client: OWMClient, update_interval: int):
         super().__init__(
             hass,
@@ -18,7 +18,7 @@ class OWMForecastCoordinator(DataUpdateCoordinator) -> bool:
         self._client = client
         self.last_error: str | None = None
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> Any:
         try:
             self.last_error = None
             return await self._client.async_get_forecast()
