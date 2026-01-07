@@ -1,0 +1,604 @@
+= Testing Guide
+:toc: left
+:icons: font
+
+== Overview
+
+Comprehensive testing is essential for reliability. This integration targets >75% code coverage with high-quality tests covering all scenarios.
+
+== Testing Framework
+
+Uses **pytest** with these plugins:
+
+* `pytest-asyncio` - For async test support
+* `pytest-cov` - For coverage reporting
+
+Installation:
+[source,bash]
+----
+pip install -e ".[dev]"
+----
+
+== Running Tests
+
+=== All Tests
+
+[source,bash]
+----
+make test
+----
+
+or
+
+[source,bash]
+----
+pytest
+----
+
+=== Specific Test File
+
+[source,bash]
+----
+pytest tests/test_api.py
+----
+
+=== Specific Test Function
+
+[source,bash]
+----
+pytest tests/test_api.py::TestOWMAPIClient::test_fetch_forecast
+----
+
+=== With Verbose Output
+
+[source,bash]
+----
+pytest -vv
+----
+
+=== With Coverage Report
+
+[source,bash]
+----
+make test-cov
+----
+
+Generates HTML coverage report in `coverage_html_report/`
+
+=== With Coverage Minimum
+
+Test fails if coverage below threshold (75%):
+
+[source,bash]
+----
+pytest --cov=custom_components/owm_precipitation_forecast --cov-fail-under=75
+----
+
+== Test Structure
+
+=== Test Discovery
+
+Pytest automatically finds tests matching:
+
+* Files: `test_*.py`
+* Classes: `Test*`
+* Functions: `test_*`
+
+Location: `tests/` directory
+
+=== Test Anatomy
+
+[source,python]
+----
+import pytest
+from unittest.mock import AsyncMock, patch
+
+class TestOWMAPIClient:
+    """Tests for OpenWeatherMap API client."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_forecast_success(self):
+        """Test successful API forecast fetch."""
+        # Arrange
+        api = OWMAPIClient(api_key="test_key")
+        mock_response = {
+            'hourly': [
+                {'dt': 1704585600, 'rain': {'1h': 5.0}},
+            ],
+            'daily': [
+                {'dt': 1704585600, 'rain': 10.0},
+            ]
+        }
+
+        # Act
+        with patch('aiohttp.ClientSession.get') as mock_get:
+            mock_get.return_value.__aenter__.return_value.json = AsyncMock(
+                return_value=mock_response
+            )
+            result = await api.fetch_forecast(44.9537, -93.0900)
+
+        # Assert
+        assert result == mock_response
+        assert 'hourly' in result
+        assert 'daily' in result
+----
+
+Key pattern: **Arrange-Act-Assert (AAA)**
+
+1. **Arrange**: Set up test data and mocks
+2. **Act**: Call function being tested
+3. **Assert**: Verify expected results
+
+=== Async Testing
+
+Tests with `async def` need `@pytest.mark.asyncio` decorator:
+
+[source,python]
+----
+@pytest.mark.asyncio
+async def test_async_function():
+    result = await async_function()
+    assert result is not None
+----
+
+=== Mocking External Calls
+
+Mock external API calls to avoid real requests:
+
+[source,python]
+----
+from unittest.mock import AsyncMock, patch
+
+@patch('aiohttp.ClientSession.get')
+async def test_with_mock(mock_get):
+    """Test with mocked HTTP client."""
+    # Configure mock
+    mock_get.return_value.__aenter__.return_value.json = AsyncMock(
+        return_value={'hourly': []}
+    )
+
+    # Test code
+    api = OWMAPIClient("key")
+    result = await api.fetch_forecast(0, 0)
+
+    # Assertions
+    assert result is not None
+    mock_get.assert_called_once()
+----
+
+=== Fixtures
+
+Shared test data in `tests/conftest.py`:
+
+[source,python]
+----
+import pytest
+
+@pytest.fixture
+def mock_forecast_data():
+    """Mock OpenWeatherMap API response."""
+    return {
+        'hourly': [
+            {
+                'dt': 1704585600,
+                'temp': 10.5,
+                'rain': {'1h': 5.0},
+                'snow': {'1h': 0.0}
+            }
+        ],
+        'daily': [
+            {
+                'dt': 1704585600,
+                'temp': {'min': 5.0, 'max': 15.0},
+                'rain': 10.0,
+                'snow': 0.0
+            }
+        ]
+    }
+
+@pytest.fixture
+async def api_client():
+    """Create test API client."""
+    from custom_components.owm_precipitation_forecast.api import OWMAPIClient
+    return OWMAPIClient(api_key="test_key")
+----
+
+Using fixtures:
+
+[source,python]
+----
+@pytest.mark.asyncio
+async def test_with_fixture(api_client, mock_forecast_data):
+    """Test using fixtures."""
+    # api_client and mock_forecast_data automatically provided
+    assert api_client is not None
+----
+
+== Test Categories
+
+=== Unit Tests
+
+Test individual functions/classes in isolation:
+
+Location: `tests/test_*.py` files
+
+Examples:
+* `test_api.py` - API client methods
+* `test_data_models.py` - Data validation
+* `test_sensors.py` - Sensor calculations
+
+[source,python]
+----
+def test_celsius_to_fahrenheit_conversion():
+    """Test temperature conversion."""
+    from custom_components.owm_precipitation_forecast.api import celsius_to_fahrenheit
+
+    assert celsius_to_fahrenheit(0) == 32.0
+    assert celsius_to_fahrenheit(100) == 212.0
+----
+
+=== Integration Tests
+
+Test multiple components working together:
+
+Location: `tests/test_integration.py`
+
+Example: Config entry creation  API fetch  Entity update
+
+[source,python]
+----
+@pytest.mark.asyncio
+async def test_setup_entry_flow():
+    """Test full setup flow."""
+    # Create config entry
+    entry = ConfigEntry(...)
+
+    # Setup integration
+    result = await async_setup_entry(hass, entry)
+
+    # Verify entities created
+    assert result is True
+    assert len(hass.data[DOMAIN][entry.entry_id]) > 0
+----
+
+=== Config Flow Tests
+
+Test configuration flow steps:
+
+Location: `tests/test_config_flow.py`
+
+[source,python]
+----
+@pytest.mark.asyncio
+async def test_config_flow_user_init():
+    """Test starting config flow as user."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": SOURCE_USER},
+    )
+
+    assert result['type'] == FlowResult.FORM
+    assert result['step_id'] == 'user'
+----
+
+=== Error & Edge Cases
+
+Test error handling and edge cases:
+
+[source,python]
+----
+@pytest.mark.asyncio
+async def test_api_timeout():
+    """Test API timeout handling."""
+    api = OWMAPIClient(api_key="test_key")
+
+    with patch('aiohttp.ClientSession.get') as mock_get:
+        mock_get.side_effect = asyncio.TimeoutError()
+
+        with pytest.raises(APIError) as exc_info:
+            await api.fetch_forecast(0, 0)
+
+        assert "timeout" in str(exc_info.value).lower()
+
+@pytest.mark.asyncio
+async def test_invalid_coordinates():
+    """Test invalid latitude/longitude."""
+    api = OWMAPIClient(api_key="test_key")
+
+    with pytest.raises(ValueError):
+        await api.fetch_forecast(lat=100, lon=200)  # Out of range
+----
+
+== Coverage Goals
+
+Target coverage by module:
+
+* `const.py`: 100% (simple constants)
+* `api.py`: 90%+ (core API logic)
+* `data_models.py`: 95%+ (data validation)
+* `entity_manager.py`: 85%+
+* `sensor.py`: 85%+
+* `config_flow.py`: 80%+ (UI logic harder to test)
+
+Overall: 75% minimum
+
+=== Viewing Coverage Reports
+
+Generate HTML report:
+
+[source,bash]
+----
+make test-cov
+open coverage_html_report/index.html
+----
+
+Shows:
+* Per-file coverage percentages
+* Line-by-line coverage (red = not tested)
+* Coverage summary
+
+## Test Data & Fixtures
+
+=== Mock OpenWeatherMap Responses
+
+File: `tests/fixtures/owm_api_responses.json`
+
+Contains realistic API responses for testing without real API calls.
+
+=== Creating Test Fixtures
+
+In `tests/conftest.py`:
+
+[source,python]
+----
+@pytest.fixture
+def hass_setup():
+    """Set up Home Assistant test environment."""
+    hass = MagicMock(spec=HomeAssistant)
+    hass.data = {}
+    hass.async_create_task = MagicMock()
+    return hass
+----
+
+=== Home Assistant Test Helpers
+
+Home Assistant provides testing utilities:
+
+[source,python]
+----
+from homeassistant.setup import async_setup_component
+from homeassistant.test.common import MockConfigEntry
+
+# Create mock config entry
+entry = MockConfigEntry(
+    domain=DOMAIN,
+    data={CONF_API_KEY: "test", CONF_LATITUDE: 0, CONF_LONGITUDE: 0},
+    entry_id="test_entry",
+)
+entry.add_to_hass(hass)
+----
+
+## Debugging Tests
+
+=== Pytest Debugger
+
+Stop at breakpoints:
+
+[source,bash]
+----
+pytest tests/test_api.py --pdb
+----
+
+Commands in debugger:
+* `n` - next line
+* `s` - step into
+* `c` - continue
+* `l` - list code
+* `p variable` - print variable
+
+=== VSCode Debugging
+
+1. Click "Run and Debug" in sidebar
+2. Select "Python: Debug Tests"
+3. Set breakpoints (click line number)
+4. Test runs and stops at breakpoints
+5. Inspect variables in Debug Console
+
+=== Print Debugging
+
+Add debug prints:
+
+[source,python]
+----
+def test_something():
+    result = expensive_calculation()
+    print(f"Result: {result}")  # Will show in test output with -s
+    assert result > 0
+----
+
+Run with print output:
+
+[source,bash]
+----
+pytest -s tests/test_api.py
+----
+
+=== Logging in Tests
+
+[source,python]
+----
+import logging
+
+def test_with_logging(caplog):
+    """Test with log capture."""
+    with caplog.at_level(logging.DEBUG):
+        my_function()
+
+    assert "expected log message" in caplog.text
+----
+
+## Performance Testing
+
+=== Timing Tests
+
+Mark slow tests:
+
+[source,python]
+----
+@pytest.mark.slow
+def test_expensive_calculation():
+    """This takes a while."""
+    ...
+----
+
+Run without slow tests:
+
+[source,bash]
+----
+pytest -m "not slow"
+----
+
+=== Profiling
+
+Time test execution:
+
+[source,bash]
+----
+pytest --durations=10  # Show 10 slowest tests
+----
+
+## Continuous Integration
+
+=== GitHub Actions Test Run
+
+Tests run automatically on:
+* Push to main/develop
+* Pull requests
+* Manual trigger
+
+See results in GitHub Actions tab.
+
+Configuration: `.github/workflows/ci.yml`
+
+=== Local Pre-Commit Testing
+
+Before committing:
+
+[source,bash]
+----
+make all-checks
+----
+
+If all pass, safe to commit.
+
+## Test Best Practices
+
+1. **One assertion per test** (prefer, but OK to have multiple related)
+2. **Clear test names** - `test_fetch_forecast_with_invalid_api_key_raises_error`
+3. **Don't depend on execution order** - Tests should be independent
+4. **Mock external dependencies** - Never call real APIs in tests
+5. **Use fixtures** - Share common setup code
+6. **Test both success and failure** - Happy path + error cases
+7. **Keep tests fast** - Use mocks, avoid sleep()
+8. **Document complex tests** - Explain why if non-obvious
+
+## Examples in Code
+
+=== Testing API Error Handling
+
+[source,python]
+----
+@pytest.mark.asyncio
+async def test_api_handles_rate_limit():
+    """Test handling of API rate limit (429 response)."""
+    api = OWMAPIClient(api_key="test_key")
+
+    with patch('aiohttp.ClientSession.get') as mock_get:
+        # Simulate rate limit response
+        mock_response = AsyncMock()
+        mock_response.status = 429
+        mock_response.text = AsyncMock(return_value="Rate limit exceeded")
+        mock_get.return_value.__aenter__.return_value = mock_response
+
+        # Should raise APIError, not crash
+        with pytest.raises(APIError) as exc_info:
+            await api.fetch_forecast(44.9537, -93.0900)
+
+        assert "rate limit" in str(exc_info.value).lower()
+----
+
+=== Testing Data Transformation
+
+[source,python]
+----
+def test_precipitation_conversion():
+    """Test mm to inches conversion."""
+    from custom_components.owm_precipitation_forecast.data_models import (
+        convert_precipitation,
+    )
+
+    # 1 inch = 25.4 mm
+    assert convert_precipitation(25.4) == pytest.approx(1.0)
+    assert convert_precipitation(0) == 0
+    assert convert_precipitation(50.8) == pytest.approx(2.0)
+----
+
+=== Testing Temperature-Adjusted Ratios
+
+[source,python]
+----
+def test_snow_ratio_calculation():
+    """Test snow ratio based on temperature."""
+    from custom_components.owm_precipitation_forecast.data_models import (
+        calculate_snow_ratio,
+    )
+
+    # Very cold
+    assert calculate_snow_ratio(-5, cold_threshold=25, cold_ratio=15) == 15.0
+
+    # Warm
+    assert calculate_snow_ratio(35, warm_threshold=32, warm_ratio=5) == 5.0
+
+    # Transitional (should interpolate)
+    ratio = calculate_snow_ratio(28, cold_threshold=25, cold_ratio=15,
+                                  warm_threshold=32, warm_ratio=5)
+    assert 5 < ratio < 15
+----
+
+== Running All Tests Locally
+
+Complete test workflow:
+
+[source,bash]
+----
+# Install dependencies
+pip install -e ".[dev]"
+
+# Format code
+make format
+
+# Run all quality checks
+make lint
+make type-check
+
+# Run tests with coverage
+make test-cov
+
+# View coverage
+open coverage_html_report/index.html
+
+# Ready to commit!
+git add .
+git commit -m "Implementation of feature X"
+----
+
+== Next Steps
+
+1. Write tests alongside code
+2. Aim for >75% coverage
+3. Run tests before committing
+4. CI validates on push
+5. Coverage reports available on GitHub
+
+See individual test files for more examples.
+

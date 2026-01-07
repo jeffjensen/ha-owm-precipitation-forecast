@@ -1,0 +1,386 @@
+= Build Instructions
+:toc: left
+:icons: font
+
+== Overview
+
+This document explains how to build and package the integration.
+
+== Prerequisites
+
+* Python 3.11 or newer
+* Development dependencies installed: `pip install -e ".[dev]"`
+
+== Local Build Process
+
+=== Quick Build (Development)
+
+For local testing, simply install in editable mode:
+
+[source,bash]
+----
+pip install -e .
+----
+
+This allows you to edit files and test immediately without reinstalling.
+
+=== Full Build Process
+
+The complete build process is automated via Makefile:
+
+[source,bash]
+----
+make all-checks
+----
+
+This runs in order:
+
+1. **Format Check** - Verifies code follows Black style
+2. **Lint** - Runs Flake8 and Pylint for code quality
+3. **Type Check** - Runs MyPy for type safety
+4. **Tests** - Runs pytest with coverage
+5. All checks must pass
+
+Only if all checks pass:
+
+[source,bash]
+----
+make build
+----
+
+This creates distribution packages in `dist/` directory.
+
+== Build Steps Explained
+
+=== Step 1: Code Formatting
+
+[source,bash]
+----
+make format
+----
+
+Auto-formats all Python code with Black (line length 88).
+
+Uses `.editorconfig` for consistency across team.
+
+=== Step 2: Linting
+
+[source,bash]
+----
+make lint
+----
+
+Runs two linters:
+
+* **Flake8**: PEP 8 style guide enforcement
+* **Pylint**: Code quality and best practices
+
+Configuration files:
+* `.flake8` - Flake8 settings
+* `.pylintrc` - Pylint rules
+
+=== Step 3: Type Checking
+
+[source,bash]
+----
+make type-check
+----
+
+MyPy ensures all functions have proper type hints and types are correct.
+
+Configuration: `pyproject.toml` [tool.mypy] section
+
+=== Step 4: Testing
+
+[source,bash]
+----
+make test
+----
+
+Runs pytest with these checks:
+
+* All unit tests pass
+* Integration tests work
+* Code coverage meets minimum (75%)
+* No test warnings
+
+Configuration: `pyproject.toml` [tool.pytest.ini_options] section
+
+=== Step 5: Validation
+
+[source,bash]
+----
+make validate
+----
+
+Home Assistant specific validation:
+
+**Hassfest** - Validates manifest.json format and completeness
+
+Requirements:
+* `manifest.json` must have all required fields
+* `strings.json` must be valid
+* Domain name must be valid Python identifier
+* All referenced files must exist
+
+== Continuous Integration (GitHub Actions)
+
+Automated builds run on:
+* Every push to `main` or `develop`
+* Every pull request
+* Manual trigger via workflow_dispatch
+
+=== CI Workflow: ci.yml
+
+Runs on:
+* Python 3.11, 3.12, 3.13 matrix
+* Ubuntu latest
+
+Steps:
+1. Install dependencies
+2. Run Black format check
+3. Run Flake8 lint
+4. Run Pylint lint
+5. Run MyPy type check
+6. Run pytest with coverage
+7. Upload coverage to Codecov
+
+Configuration: `.github/workflows/ci.yml`
+
+=== CI Workflow: hassfest.yml
+
+Validates Home Assistant integration format:
+
+Configuration: `.github/workflows/hassfest.yml`
+
+=== CI Workflow: hacs-action.yml
+
+Validates HACS repository structure:
+
+Configuration: `.github/workflows/hacs-action.yml`
+
+== Release Build
+
+=== Automatic Release via GitHub Actions
+
+When you push a git tag, release workflow runs:
+
+[source,bash]
+----
+git tag v1.1.0
+git push origin v1.1.0
+----
+
+Workflow: `.github/workflows/release.yml`
+
+Steps:
+1. Run all checks (format, lint, type-check, test, hassfest)
+2. Build distributions (wheel and sdist)
+3. Create GitHub Release with built artifacts
+4. Attach to release
+
+=== Manual Release Build
+
+To build without releasing:
+
+[source,bash]
+----
+make clean      # Clean old builds
+make build      # Build new distributions
+----
+
+Outputs:
+* `dist/ha_owm_precipitation_forecast_integration-1.0.0-py3-none-any.whl`
+* `dist/ha-owm-precipitation-forecast-integration-1.0.0.tar.gz`
+
+== Distributing via HACS
+
+HACS automatically detects releases. Process:
+
+1. Create GitHub Release (automatic via workflow or manual)
+2. Tag must match `manifest.json` version
+3. HACS scans for latest release
+4. Integration becomes available in HACS UI
+
+Users see in HACS:
+* Version number
+* Release notes
+* Download/install buttons
+
+== Version Management
+
+=== Versioning Scheme
+
+Uses Semantic Versioning (SemVer): `MAJOR.MINOR.PATCH`
+
+* **MAJOR**: Breaking changes
+* **MINOR**: New features (backward compatible)
+* **PATCH**: Bug fixes
+
+Example progression:
+* 1.0.0 - Initial release
+* 1.1.0 - Add new sensor type
+* 1.1.1 - Fix API timeout bug
+* 2.0.0 - Remove old sensor types
+
+=== Updating Version
+
+Files to update:
+
+1. `manifest.json` - Update `version` field
+2. `pyproject.toml` - Update `version` field (should match)
+3. Git tag - `git tag v1.1.0`
+4. CHANGELOG or Release Notes
+
+Both files must have matching version numbers.
+
+== Build Configuration Files
+
+=== pyproject.toml
+
+Modern Python packaging configuration:
+* Project metadata
+* Dependencies
+* Build system
+* Tool configurations (Black, Pytest, MyPy, etc.)
+* Entry points (if applicable)
+
+All configuration centralized in one file (no setup.py needed).
+
+=== setup.py
+
+Not used in this project - modern approach uses pyproject.toml
+
+=== MANIFEST.in
+
+Not needed with setuptools + pyproject.toml
+
+Files are automatically included based on manifest.json reference
+
+== Troubleshooting Builds
+
+=== "Format check failed"
+
+Run formatter:
+[source,bash]
+----
+make format
+git add .
+git commit -m "Auto-format code"
+----
+
+=== "Type check errors"
+
+Review MyPy output, add missing type hints:
+
+[source,python]
+----
+def my_function(value):  # Missing type hints
+    ...
+
+# Fixed:
+def my_function(value: str) -> bool:
+    ...
+----
+
+=== "Lint warnings"
+
+Fix reported issues or suppress if intentional:
+
+[source,python]
+----
+result = eval(user_input)  # pylint: disable=eval-used
+----
+
+=== "Test failures"
+
+Debug individual test:
+
+[source,bash]
+----
+pytest tests/test_file.py::test_function -vv
+----
+
+=== "Hassfest validation fails"
+
+Check manifest.json for:
+* All required fields present
+* Correct data types
+* Valid domain name
+* File references exist
+
+Common issues:
+* `documentation` URL not HTTPS
+* `codeowners` not in @username format
+* Domain contains hyphens (use underscores)
+
+== Advanced Topics
+
+=== Custom Build Targets
+
+Add custom targets to Makefile for specific needs:
+
+[source,makefile]
+----
+rebuild: clean install-dev format lint type-check test
+
+quick-test:
+	pytest tests/ -q
+
+coverage-report: test-cov
+	open coverage_html_report/index.html
+----
+
+=== Dependency Pinning
+
+For production, pin specific versions:
+
+[source,toml]
+----
+dependencies = [
+    "aiohttp==3.9.0",
+    "python-dateutil==2.8.2",
+]
+----
+
+Default uses compatible releases:
+
+[source,toml]
+----
+dependencies = [
+    "aiohttp>=3.9.0",
+    "python-dateutil>=2.8.2",
+]
+----
+
+=== Building Docker Image
+
+If needed for testing in isolated environment:
+
+[source,dockerfile]
+----
+FROM python:3.12-slim
+WORKDIR /app
+COPY . .
+RUN pip install -e ".[dev]"
+CMD ["make", "all-checks"]
+----
+
+== Next Steps
+
+1. Run `make all-checks` locally before committing
+2. Push to GitHub - CI runs automatically
+3. Fix any CI failures
+4. Tag for release when ready
+5. HACS integration available to users
+
+== Getting Help
+
+* Build errors: Check CI logs in GitHub Actions
+* Tool issues: Consult tool documentation
+  * Black: https://black.readthedocs.io/
+  * Pytest: https://docs.pytest.org/
+  * MyPy: https://mypy.readthedocs.io/
+  * Pylint: https://pylint.io/
+  * Flake8: https://flake8.pycqa.org/
+

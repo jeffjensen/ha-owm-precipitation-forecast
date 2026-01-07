@@ -1,0 +1,86 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OpenWeatherMap API Configuration",
+        "description": "Set up your OpenWeatherMap precipitation forecast integration",
+        "data": {
+          "api_key": "API Key",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "location_name": "Location Name (e.g., Home, Office)"
+        },
+        "data_description": {
+          "api_key": "Get your free API key from https://openweathermap.org/api",
+          "latitude": "Geographic latitude of the location",
+          "longitude": "Geographic longitude of the location",
+          "location_name": "Friendly name for this location"
+        }
+      }
+    },
+    "error": {
+      "invalid_api_key": "Invalid API key",
+      "cannot_connect": "Failed to connect to OpenWeatherMap",
+      "invalid_location": "Invalid latitude/longitude",
+      "already_configured": "This location is already configured"
+    },
+    "abort": {
+      "already_configured": "This location is already configured",
+      "reconfigure_failed": "Failed to reconfigure the integration"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "description": "Configure precipitation forecast options",
+        "data": {
+          "enable_rain": "Enable rain forecast",
+          "enable_snow": "Enable snow forecast",
+          "polling_interval_minutes": "Polling interval (minutes)",
+          "cold_temp_threshold": "Cold temperature threshold (°F)",
+          "cold_temp_ratio": "Cold temperature snow ratio (cold:1)",
+          "warm_temp_threshold": "Warm temperature threshold (°F)",
+          "warm_temp_ratio": "Warm temperature snow ratio (warm:1)"
+        },
+        "data_description": {
+          "enable_rain": "Include rain precipitation data",
+          "enable_snow": "Include snow precipitation data",
+          "polling_interval_minutes": "Interval for fetching new forecast data",
+          "cold_temp_threshold": "Below this temp uses cold ratio",
+          "cold_temp_ratio": "Inches of snow per inch of rain at cold temps",
+          "warm_temp_threshold": "Above this temp uses warm ratio",
+          "warm_temp_ratio": "Inches of snow per inch of rain at warm temps"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "rain_hourly": {
+        "name": "Rain Hourly"
+      },
+      "rain_daily": {
+        "name": "Rain Daily"
+      },
+      "rain_next24h": {
+        "name": "Rain Next 24H"
+      },
+      "snow_hourly": {
+        "name": "Snow Hourly"
+      },
+      "snow_daily": {
+        "name": "Snow Daily"
+      },
+      "snow_next24h": {
+        "name": "Snow Next 24H"
+      }
+    },
+    "binary_sensor": {
+      "health": {
+        "name": "Health"
+      }
+    }
+  }
+}
+

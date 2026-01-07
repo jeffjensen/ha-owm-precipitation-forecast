@@ -1,0 +1,43 @@
+[MASTER]
+jobs=0
+limit-inference-results=100
+unsafe-load-any-extension=False
+extension-pkg-allow-list=
+
+[MESSAGES CONTROL]
+disable=
+    C0111,  # missing-docstring
+    C0103,  # invalid-name (allow snake_case vars)
+    C0301,  # line-too-long (black handles this)
+    W0212,  # protected-access
+    R0913,  # too-many-arguments
+    R0914,  # too-many-locals
+    W0703,  # broad-except
+    C0302,  # too-many-lines
+    R0904,  # too-many-public-methods
+    R0801,  # duplicate-code
+
+[FORMAT]
+max-line-length=88
+indent-string='    '
+
+[DESIGN]
+max-args=5
+max-attributes=7
+max-bool-expr=5
+max-branches=12
+max-locals=15
+max-parents=7
+max-public-methods=20
+max-returns=6
+max-statements=50
+min-public-methods=1
+
+[LOGGING]
+logging-format-style=new
+logging-modules=logging,structlog
+
+[VARIABLES]
+init-import=no
+redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io
+

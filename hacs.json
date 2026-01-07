@@ -1,0 +1,5 @@
+{
+  "name": "OpenWeatherMap Precipitation Forecast",
+  "homeassistant": "2024.1.0",
+  "hacs": "1.30.0"
+}

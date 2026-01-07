@@ -1,0 +1,10 @@
+rules:
+  config_flow: done
+  test_setup_integration: done
+  test_helper_class: done
+  docs_high_level_description: done
+  docs_installation_instructions: done
+  docs_configuration_instructions: done
+  test_component: partial
+  brands: exempt
+

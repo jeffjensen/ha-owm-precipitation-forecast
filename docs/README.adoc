@@ -1,0 +1,485 @@
+= OpenWeatherMap Precipitation Forecast Integration for Home Assistant
+:toc: left
+:toc-title: Table of Contents
+:toclevels: 3
+:sectnumlevels: 3
+:doctype: article
+:icons: font
+:source-highlighter: pygments
+:stylesheet: asciidoctor.css
+:nofooter:
+
+== Overview
+
+The OpenWeatherMap Precipitation Forecast integration provides hourly, daily, and next-24-hour precipitation forecasts for both rain and snow directly within Home Assistant.
+
+This integration uses the OpenWeatherMap One Call API 3.0 to fetch real-time forecast data, with optional temperature-adjusted snow ratio calculations to convert liquid precipitation measurements to estimated snow accumulation.
+
+Key features:
+
+* Rain and snow precipitation forecasts
+* Hourly, daily, and 24-hour accumulation sensors
+* Temperature-adjusted snow-to-precipitation conversion
+* Multiple location support (separate config entry per location)
+* Highly configurable via Home Assistant UI
+* Customizable polling intervals (15 minutes to 24 hours)
+* Rich sensor attributes for chart integration
+* Health monitoring entity
+* Full test coverage and CI/CD validation
+* HACS installable
+
+== Requirements
+
+* Home Assistant 2024.1.0 or newer
+* OpenWeatherMap API key (free tier supported)
+* Network connectivity to openweathermap.org
+
+== Installation
+
+=== Via HACS (Recommended)
+
+. Open HACS in your Home Assistant instance
+. Click on *Integrations*
+. Click the *Create automation* (+ button)
+. Search for "OpenWeatherMap Precipitation Forecast"
+. Click *Install*
+. Restart Home Assistant
+
+=== Manual Installation
+
+. Clone the repository:
++
+[source,bash]
+----
+git clone https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration.git
+----
+
+. Copy to Home Assistant configuration directory:
++
+[source,bash]
+----
+cp -r ha-owm-precipitation-forecast-integration/custom_components/owm_precipitation_forecast \
+  ~/.homeassistant/custom_components/
+----
+
+. Restart Home Assistant
+
+== Initial Setup
+
+=== Getting an OpenWeatherMap API Key
+
+. Visit https://openweathermap.org/api
+. Sign up for a free account
+. Navigate to API Keys section
+. Copy your default API key
+. The free tier includes the One Call API 3.0 needed for this integration
+
+=== Adding the Integration
+
+. In Home Assistant, go to *Settings*  *Devices & Services*
+. Click *Create Automation* (blue + button) in the Integrations tab
+. Search for and select *OpenWeatherMap Precipitation Forecast*
+. Click *Create*
+. Follow the configuration flow:
+  .. Enter your OpenWeatherMap API key
+  .. Enter location coordinates (latitude, longitude)
+  .. Enter a friendly name for the location (e.g., "Home")
+  .. Optionally choose which precipitation types to enable (Rain, Snow, both)
+  .. Optionally select polling interval (default: 1 hour)
+. Click *Create*
+
+=== Adding Additional Locations
+
+To add another location:
+
+. Go to *Settings*  *Devices & Services*  *Integrations*
+. Click *OpenWeatherMap Precipitation Forecast*
+. Click *Create Device* button
+. Repeat the configuration flow with the new location's coordinates
+
+Each location becomes a separate config entry.
+
+== Configuration
+
+All configuration is performed through Home Assistant UI. No YAML editing is required.
+
+=== Initial Configuration (Setup Flow)
+
+[cols="1,1,2"]
+|===
+|Field|Example|Description
+
+|API Key
+|`a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6`
+|Your OpenWeatherMap API key from openweathermap.org
+
+|Latitude
+|`44.9537`
+|Geographic latitude of your location
+
+|Longitude
+|`-93.0900`
+|Geographic longitude of your location
+
+|Location Name
+|`Home`
+|Friendly name for this location (used in entity names)
+|===
+
+=== Options Configuration (Post-Setup)
+
+After setup, modify options by clicking the integration's *Options* button.
+
+[cols="1,1,2"]
+|===
+|Option|Default|Description
+
+|Enable Rain
+|Yes
+|Include rain precipitation sensors
+
+|Enable Snow
+|Yes
+|Include snow precipitation sensors
+
+|Polling Interval
+|1 hour
+|How often to fetch new forecast data (15 min to 24 hours)
+
+|Cold Temperature Threshold
+|25°F
+|Temperature below which "cold" snow ratio is used
+
+|Cold Temperature Ratio
+|15.0
+|Inches of snow per inch of rain at cold temperatures (15:1)
+
+|Warm Temperature Threshold
+|32°F
+|Temperature above which "warm" snow ratio is used
+
+|Warm Temperature Ratio
+|5.0
+|Inches of snow per inch of rain at warm temperatures (5:1)
+|===
+
+Temperature between thresholds uses interpolated ratio.
+
+== Entities
+
+This integration creates the following entities for each location. Entity names include the location name (e.g., `home`).
+
+=== Rain Sensors
+
+`sensor.owm_precipitation_forecast_{location}_rain_hourly`:: Current hour rain total (inches)
+`sensor.owm_precipitation_forecast_{location}_rain_daily`:: Current day rain total (inches)
+`sensor.owm_precipitation_forecast_{location}_rain_next24h`:: Next 24 hours rain total (inches)
+
+=== Snow Sensors
+
+`sensor.owm_precipitation_forecast_{location}_snow_hourly`:: Current hour snow equivalent (inches)
+`sensor.owm_precipitation_forecast_{location}_snow_daily`:: Current day snow equivalent (inches)
+`sensor.owm_precipitation_forecast_{location}_snow_next24h`:: Next 24 hours snow equivalent (inches)
+
+=== Health Monitoring
+
+`binary_sensor.owm_precipitation_forecast_{location}_health`:: Integration health status (On = healthy, Off = issues detected)
+
+=== Sensor Attributes
+
+All precipitation sensors include useful attributes for advanced integrations:
+
+`forecast`:: Array of hourly forecast objects, each containing:
+  - `timestamp`: Unix timestamp of hour
+  - `rain`: Rain precipitation in inches (if rain enabled)
+  - `snow`: Snow precipitation in inches (if snow enabled)
+  - `temperature`: Temperature at hour (°F)
+
+`timestamp`:: Last update timestamp (ISO 8601)
+
+`location`:: Location name configured during setup
+
+`latitude`:: Latitude of location
+
+`longitude`:: Longitude of location
+
+`last_update`:: When forecast was last updated
+
+`next_update`:: When forecast will next update
+
+Example attribute structure:
+
+[source,json]
+----
+{
+  "forecast": [
+    {
+      "timestamp": 1704585600,
+      "rain": 0.05,
+      "snow": 0.0,
+      "temperature": 28.5
+    },
+    {
+      "timestamp": 1704589200,
+      "rain": 0.08,
+      "snow": 0.08,
+      "temperature": 22.3
+    }
+  ],
+  "timestamp": "2024-01-07T12:00:00+00:00",
+  "location": "Home",
+  "latitude": 44.9537,
+  "longitude": -93.0900,
+  "last_update": "2024-01-07T12:00:00+00:00",
+  "next_update": "2024-01-07T13:00:00+00:00"
+}
+----
+
+== Temperature-Adjusted Snow Ratios
+
+Snow is not directly provided by OpenWeatherMap for most forecast scenarios. Instead, the integration converts liquid precipitation to snow equivalent using temperature-dependent ratios.
+
+=== How It Works
+
+For each hour of forecast data:
+
+. Get the liquid precipitation amount (mm) from API
+. Get the temperature for that hour
+. Determine which ratio to use based on temperature
+. Multiply liquid precipitation × ratio = snow equivalent
+
+Example: If forecast shows 1mm rain at 20°F:
+- Temperature is below cold threshold (25°F)
+- Use cold ratio (15:1)
+- Snow equivalent = 1mm × 15 = 15mm = ~0.59 inches
+
+=== Default Ratios (Minnesota)
+
+[cols="1,1,2"]
+|===
+|Temperature Range|Ratio|Description
+
+|< 25°F (Very Cold)
+|15:1
+|Dry, fluffy snow. 15 inches of snow per 1 inch of liquid equivalent.
+
+|25-32°F (Transitional)
+|10:1
+|Mix of wet and dry snow. Interpolated between cold and warm ratios.
+
+|> 32°F (Warm)
+|5:1
+|Wet, heavy snow near melting point. 5 inches of snow per 1 inch of liquid equivalent.
+|===
+
+These defaults are optimized for Minnesota winter conditions but may not suit all regions. Customize in options if needed.
+
+=== Customizing Ratios
+
+The ratios are fully customizable per location via options flow:
+
+. Go to *Settings*  *Devices & Services*
+. Find your integration
+. Click *Options*
+. Adjust temperature thresholds and ratios to match your region
+. Click *Save*
+
+Example: For Colorado high altitude:
+- Cold threshold: 15°F
+- Cold ratio: 20:1 (very dry, high altitude snow)
+- Warm ratio: 8:1 (still dry even at "warm" temps)
+
+== Advanced Usage
+
+=== Using Forecast Data in Automations
+
+The hourly forecast data in sensor attributes enables powerful automations:
+
+[source,yaml]
+----
+alias: "Alert if heavy snow expected"
+trigger:
+  - platform: template
+    value_template: >
+      {% set forecast = state_attr('sensor.owm_precipitation_forecast_home_snow_next24h', 'forecast') %}
+      {{ forecast | selectattr('snow', '>', 0.5) | list | length > 0 }}
+action:
+  - service: notify.mobile_app_phone
+    data:
+      message: "Heavy snow expected in next 24 hours"
+----
+
+=== Using with Cards in UI
+
+Create custom Lovelace cards that display the precipitation forecast:
+
+[source,yaml]
+----
+type: vertical-stack
+cards:
+  - type: entities
+    entities:
+      - sensor.owm_precipitation_forecast_home_rain_next24h
+      - sensor.owm_precipitation_forecast_home_snow_next24h
+  - type: custom:apexcharts-card
+    series:
+      - entity: sensor.owm_precipitation_forecast_home_rain_next24h
+        attribute: forecast
+        name: Rain
+        data_generator: |
+          return entity.attributes.forecast.map(item => ({
+            x: new Date(item.timestamp * 1000),
+            y: item.rain
+          }));
+----
+
+=== Health Monitoring
+
+Monitor the health binary sensor to detect when API calls are failing:
+
+[source,yaml]
+----
+automation:
+  - alias: "Alert if precipitation forecast is unhealthy"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.owm_precipitation_forecast_home_health
+        to: "off"
+    action:
+      - service: notify.mobile_app_phone
+        data:
+          message: "Precipitation forecast service is unhealthy"
+----
+
+== Troubleshooting
+
+=== Integration Not Appearing in UI
+
+**Symptom**: After installation, cannot find the integration in Add Integration dialog.
+
+**Solutions**:
+. Verify files are in correct location: `config/custom_components/owm_precipitation_forecast/`
+. Check `manifest.json` exists in that directory
+. Restart Home Assistant completely (Settings  System  Restart)
+. Check browser cache (Ctrl+Shift+Delete, clear all)
+. Check Home Assistant logs for errors
+
+=== "Invalid API Key" Error
+
+**Symptom**: Config flow shows "Invalid API Key" error.
+
+**Solutions**:
+. Verify API key from https://openweathermap.org/api (copy exactly)
+. Ensure account is not suspended (check email)
+. Wait a few minutes after signup for API to activate
+. Try generating a new API key on the website
+. Verify the Free account includes "One Call API 3.0"
+
+=== "Failed to Connect" Error
+
+**Symptom**: Config flow shows "Failed to connect to OpenWeatherMap" error.
+
+**Solutions**:
+. Verify network connectivity (can you browse openweathermap.org?)
+. Check firewall/proxy settings blocking openweathermap.org
+. Try manually testing API call:
++
+[source,bash]
+----
+curl "https://api.openweathermap.org/data/3.0/onecall?lat=44.9537&lon=-93.09&appid=YOUR_API_KEY"
+----
++
+. Check OpenWeatherMap API status page
+. If private network, verify outbound HTTPS access is allowed
+
+=== "Invalid Location" Error
+
+**Symptom**: Config flow shows "Invalid location" or latitude/longitude error.
+
+**Solutions**:
+. Verify latitude/longitude format (decimal numbers, e.g. 44.9537, not 44°57')
+. Confirm coordinates are within valid range:
+  - Latitude: -90 to +90
+  - Longitude: -180 to +180
+. Test with known coordinates:
+  - New York: 40.7128, -74.0060
+  - London: 51.5074, -0.1278
+  - Sydney: -33.8688, 151.2093
+
+=== Forecast Data Not Updating
+
+**Symptom**: Sensor data shows same values over time, not refreshing.
+
+**Solutions**:
+. Check polling interval setting (not set to 24 hours?)
+. Review Home Assistant logs for errors:
++
+[source,yaml]
+----
+logger:
+  logs:
+    custom_components.owm_precipitation_forecast: debug
+----
++
+. Verify network connectivity and API key still valid
+. Check that "health" binary sensor shows "On" (healthy)
+. Force an update via developer tools (if available in future versions)
+
+== API Details
+
+This integration uses the **OpenWeatherMap One Call API 3.0**.
+
+=== API Endpoints Used
+
+`GET https://api.openweathermap.org/data/3.0/onecall`::
+  - Retrieves hourly and daily forecast
+  - Parameters: `lat`, `lon`, `appid`, `units=metric`
+  - Free tier: 1,000 calls/day
+
+=== Data Retrieved
+
+* Hourly forecast (48 hours available)
+  - Precipitation: `hourly.rain.1h` and `hourly.snow.1h` (in mm)
+  - Temperature: `hourly.temp` (in Celsius)
+
+* Daily forecast (8 days available)
+  - Precipitation: `daily.rain` and `daily.snow` (in mm)
+  - Temperature: `daily.temp.min`, `daily.temp.max` (in Celsius)
+
+=== Rate Limiting
+
+The free tier of OpenWeatherMap allows 1,000 API calls per day. At default 1-hour polling intervals:
+
+- 24 calls per day per location
+- With default settings, supports up to 41 locations simultaneously
+
+For more locations, increase polling intervals.
+
+== Development & Contributing
+
+See xref:DEVELOPMENT.adoc[DEVELOPMENT.adoc] for development setup.
+
+See xref:BUILD.adoc[BUILD.adoc] for building instructions.
+
+See xref:TESTING.adoc[TESTING.adoc] for testing details.
+
+== License
+
+This integration is licensed under the MIT License. See LICENSE file for details.
+
+== Support & Issues
+
+* GitHub Issues: https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/issues
+* Home Assistant Community: https://community.home-assistant.io/
+
+== Credits
+
+* OpenWeatherMap for weather data and API
+* Home Assistant team for integration framework
+* Home Assistant community for best practices and feedback
+
+---
+
+*Last Updated: January 6, 2026*
+*Version: 1.0.0*
+

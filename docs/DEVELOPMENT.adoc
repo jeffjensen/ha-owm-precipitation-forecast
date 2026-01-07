@@ -1,0 +1,398 @@
+= Development Setup Guide
+:toc: left
+:icons: font
+
+== Prerequisites
+
+* Python 3.11 or newer
+* Git
+* Virtual environment (recommended)
+* Home Assistant development environment (optional but helpful)
+
+== Setting Up Development Environment
+
+=== 1. Clone the Repository
+
+[source,bash]
+----
+git clone https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration.git
+cd ha-owm-precipitation-forecast-integration
+----
+
+=== 2. Create Python Virtual Environment
+
+[source,bash]
+----
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+----
+
+=== 3. Install Development Dependencies
+
+[source,bash]
+----
+make install-dev
+# Or manually:
+pip install -e ".[dev]"
+----
+
+This installs:
+* The integration itself in editable mode
+* Testing framework (pytest, pytest-asyncio, pytest-cov)
+* Code formatters (Black)
+* Linters (Pylint, Flake8)
+* Type checker (MyPy)
+
+=== 4. Verify Setup
+
+Test that all tools are working:
+
+[source,bash]
+----
+make all-checks
+----
+
+This runs:
+* Code formatting check
+* Linting
+* Type checking
+* Tests
+
+All should pass with no errors.
+
+== Project Structure
+
+[source]
+----
+custom_components/owm_precipitation_forecast/
+ __init__.py              # Integration entry point
+ manifest.json            # HACS metadata
+ strings.json             # UI localization
+ const.py                 # Constants (Phase 1)
+ config_flow.py           # Config/options flows (Phase 3)
+ api.py                   # OWM API client (Phase 2)
+ data_models.py           # Data structures (Phase 2)
+ entity_manager.py        # Entity lifecycle (Phase 2)
+ sensor.py                # Sensor entities (Phase 4)
+ health.py                # Health entity (Phase 2)
+
+tests/
+ __init__.py
+ conftest.py              # Shared test fixtures
+ test_api.py              # API client tests
+ test_config_flow.py      # Config flow tests
+ test_sensors.py          # Sensor tests
+ test_data_models.py      # Data model tests
+ test_entity_manager.py   # Entity manager tests
+ test_integration.py      # Full integration tests
+ fixtures/
+     owm_api_responses.json  # Mock API responses
+----
+
+== Code Style & Quality
+
+=== Code Formatting
+
+The project uses **Black** for code formatting (line length: 88).
+
+Format all code:
+[source,bash]
+----
+make format
+----
+
+Or use automatic formatting on save in VSCode (already configured).
+
+=== Linting
+
+Two linters are used:
+
+**Flake8** (style guide enforcement):
+[source,bash]
+----
+flake8 custom_components/owm_precipitation_forecast tests
+----
+
+**Pylint** (code quality):
+[source,bash]
+----
+pylint custom_components/owm_precipitation_forecast
+----
+
+Run both:
+[source,bash]
+----
+make lint
+----
+
+=== Type Checking
+
+MyPy ensures type safety:
+
+[source,bash]
+----
+make type-check
+----
+
+All functions must have type hints. Example:
+
+[source,python]
+----
+async def fetch_forecast(
+    self,
+    latitude: float,
+    longitude: float
+) -> dict[str, Any]:
+    """Fetch forecast from API.
+
+    Args:
+        latitude: Location latitude
+        longitude: Location longitude
+
+    Returns:
+        Dictionary with forecast data
+
+    Raises:
+        APIError: If API call fails
+    """
+    # implementation
+    pass
+----
+
+== Testing
+
+=== Running Tests
+
+Run all tests:
+[source,bash]
+----
+make test
+----
+
+Run with coverage:
+[source,bash]
+----
+make test-cov
+----
+
+Coverage report opens in `coverage_html_report/index.html`
+
+Run specific test:
+[source,bash]
+----
+pytest tests/test_api.py::TestOWMAPIClient::test_fetch_forecast
+----
+
+Run with verbose output:
+[source,bash]
+----
+pytest -vv tests/
+----
+
+=== Test Structure
+
+Tests follow Home Assistant conventions:
+
+[source,python]
+----
+import pytest
+from unittest.mock import AsyncMock, patch
+
+@pytest.mark.asyncio
+async def test_api_success():
+    """Test successful API call."""
+    # Setup
+    api = OWMAPIClient("test_key")
+
+    # Mock external call
+    with patch('aiohttp.ClientSession.get') as mock_get:
+        mock_get.return_value.__aenter__.return_value.json.return_value = {
+            'hourly': [],
+            'daily': []
+        }
+
+        # Execute
+        result = await api.fetch_forecast(44.9537, -93.0900)
+
+        # Assert
+        assert result is not None
+        assert 'hourly' in result
+----
+
+=== Debugging Tests
+
+Use pytest debugger:
+[source,bash]
+----
+pytest tests/test_api.py::test_something --pdb
+----
+
+Or set breakpoints in VSCode and run debug configuration "Python: Debug Tests"
+
+== Working with the Integration
+
+=== Testing in Home Assistant
+
+For manual testing in actual Home Assistant:
+
+1. Copy integration to Home Assistant config:
++
+[source,bash]
+----
+cp -r custom_components/owm_precipitation_forecast \
+  ~/.homeassistant/custom_components/
+----
+
+2. Restart Home Assistant
+
+3. Add integration via UI with test API key
+
+=== Understanding Entity Lifecycle
+
+Entities are created in this order:
+
+1. Config entry created via config flow
+2. `async_setup_entry()` called in `__init__.py`
+3. Coordinator created to manage API polling
+4. Sensors created and registered
+5. Periodic updates via coordinator
+
+Each location is a separate config entry.
+
+=== Adding New Features
+
+When adding features:
+
+1. Add constant to `const.py`
+2. Add test case first (TDD approach)
+3. Implement feature
+4. Ensure `make all-checks` passes
+5. Update documentation
+6. Add entry to changelog
+
+== Debugging & Logging
+
+=== Enable Debug Logging
+
+In Home Assistant configuration.yaml:
+
+[source,yaml]
+----
+logger:
+  logs:
+    custom_components.owm_precipitation_forecast: debug
+----
+
+Then check logs in UI or file: `config/home-assistant.log`
+
+=== Using Print Debugging
+
+In tests:
+[source,python]
+----
+import logging
+_LOGGER = logging.getLogger(__name__)
+
+_LOGGER.debug("Debug message: %s", variable)
+_LOGGER.error("Error: %s", str(exception))
+----
+
+== Common Development Tasks
+
+=== Adding a New Sensor
+
+1. Define entity in `const.py`
+2. Create test in `test_sensors.py`
+3. Implement in `sensor.py`
+4. Add to strings.json for UI
+5. Update entity manager
+6. Add documentation
+
+=== Modifying Configuration Options
+
+1. Update `const.py` with new option name
+2. Update `strings.json` with UI labels
+3. Update `config_flow.py` options step
+4. Update tests in `test_config_flow.py`
+5. Handle migration if changing existing option
+
+=== Updating Dependencies
+
+1. Edit `pyproject.toml` under `dependencies`
+2. Run `pip install -e ".[dev]"`
+3. Update requirements in `manifest.json`
+4. Test thoroughly
+5. Document change in PR
+
+== Git Workflow
+
+=== Branches
+
+* `main` - Production-ready code
+* `develop` - Active development
+* `feature/description` - Feature branches
+
+=== Commits
+
+Keep commits focused and descriptive:
+
+[source,bash]
+----
+git commit -m "Add temperature-adjusted snow ratio feature"
+git commit -m "Fix: handle missing rain data from API"
+git commit -m "Refactor: extract OWM API logic"
+----
+
+=== Pull Requests
+
+Before submitting PR:
+
+1. Run `make all-checks`
+2. Verify CI passes
+3. Update documentation
+4. Add tests for new code
+5. Write clear PR description
+
+== IDE Configuration
+
+=== VSCode Setup
+
+Already configured via:
+- `.vscode/settings.json` - Editor settings
+- `.vscode/launch.json` - Debug configuration
+- `.vscode/extensions.json` - Recommended extensions
+
+Key features:
+* Automatic Black formatting on save
+* Pylint and Flake8 linting
+* MyPy type checking
+* Pytest integration for running/debugging tests
+
+=== Running Tests from VSCode
+
+1. Click Test icon in sidebar
+2. Run individual tests or all tests
+3. View results and debug failures
+
+== Performance Considerations
+
+* API calls are cached during the polling interval
+* Sensor updates are batch processed
+* Entity state updates are optimized
+* No blocking I/O in main thread
+
+== Next Steps
+
+* Review existing code in Phases 1-4
+* Run `make all-checks` regularly
+* Read Home Assistant integration documentation
+* Study existing weather integrations for patterns
+* Contribute improvements!
+
+== Getting Help
+
+* Home Assistant Dev Docs: https://developers.home-assistant.io/
+* Integration Framework: https://developers.home-assistant.io/docs/creating_integration_manifest/
+* Testing Guide: https://developers.home-assistant.io/docs/development_testing/
+* Community Forums: https://community.home-assistant.io/
+
