@@ -19,7 +19,7 @@ def parse_forecast(data: Dict, snow_calc: SnowRatioCalculator) -> ForecastBundle
 
         rain_in = _mm_to_in(rain_mm)
         snow_liquid_in = _mm_to_in(snow_mm)
-        snow_in = snow_calc.liquid_to_snow(snow_liquid_in, temp_f)
+        snow_in = snow_calc.liquid_to_snow_inches(snow_liquid_in, temp_f)
 
         hourly.append(HourlyPrecipitation(ts, rain_in, snow_in))
 
@@ -31,7 +31,7 @@ def parse_forecast(data: Dict, snow_calc: SnowRatioCalculator) -> ForecastBundle
 
         rain_in = _mm_to_in(rain_mm)
         snow_liquid_in = _mm_to_in(snow_mm)
-        snow_in = snow_calc.liquid_to_snow(snow_liquid_in, temp_f)
+        snow_in = snow_calc.liquid_to_snow_inches(snow_liquid_in, temp_f)
 
         daily.append(DailyPrecipitation(ts, rain_in, snow_in))
 

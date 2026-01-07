@@ -15,7 +15,7 @@ from .const import (
 class OWMPrecipitationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(self, user_input=None) -> bool:
         if user_input is not None:
             return self.async_create_entry(title="OWM Precipitation Forecast", data=user_input)
 

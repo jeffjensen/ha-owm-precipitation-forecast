@@ -7,7 +7,7 @@ from .owm_client import OWMClient
 
 _LOGGER = logging.getLogger(__name__)
 
-class OWMForecastCoordinator(DataUpdateCoordinator):
+class OWMForecastCoordinator(DataUpdateCoordinator) -> bool:
     def __init__(self, hass: HomeAssistant, client: OWMClient, update_interval: int):
         super().__init__(
             hass,

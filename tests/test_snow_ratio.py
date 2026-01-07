@@ -6,6 +6,6 @@ def test_ratio_selection():
     assert calc.ratio_for_temp(25) == 15.0
     assert calc.ratio_for_temp(5) == 20.0
 
-def test_liquid_to_snow():
+def test_liquid_to_snow_inches():
     calc = SnowRatioCalculator({32.0: 10.0})
     assert calc.liquid_to_snow_inches(1.0, 30.0) == 10.0
