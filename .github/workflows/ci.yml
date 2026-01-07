@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -76,4 +75,3 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
-
