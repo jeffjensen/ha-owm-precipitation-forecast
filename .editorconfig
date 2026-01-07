@@ -41,4 +41,3 @@ trim_trailing_whitespace = false
 # Makefile
 [Makefile]
 indent_style = tab
-

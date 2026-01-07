@@ -23,7 +23,7 @@ cd ha-owm-precipitation-forecast-integration
 
 [source,bash]
 ----
-python3 -m venv venv
+python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ----
 
@@ -395,4 +395,3 @@ Key features:
 * Integration Framework: https://developers.home-assistant.io/docs/creating_integration_manifest/
 * Testing Guide: https://developers.home-assistant.io/docs/development_testing/
 * Community Forums: https://community.home-assistant.io/
-
