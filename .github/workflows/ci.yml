@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -12,5 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pytest
-      - run: pytest
+      - run: pip install pytest pytest-cov ruff mypy
+      - run: ruff custom_components
+      - run: mypy custom_components
+      - run: pytest --cov=custom_components
