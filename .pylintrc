@@ -41,3 +41,6 @@ logging-modules=logging,structlog
 init-import=no
 redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io
 
+[TYPECHECK]
+ignored-modules=homeassistant,homeassistant.config_entries,homeassistant.core
+ignored-classes=HomeAssistant,ConfigEntry
