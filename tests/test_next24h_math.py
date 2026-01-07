@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from custom_components.ha_owm_precipitation_forecast.models import HourlyPrecip, ForecastData
 

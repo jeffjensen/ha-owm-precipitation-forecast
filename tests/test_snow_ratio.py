@@ -1,4 +1,3 @@
-
 from custom_components.ha_owm_precipitation_forecast.snow_ratio import SnowRatioCalculator
 
 def test_ratio_selection():

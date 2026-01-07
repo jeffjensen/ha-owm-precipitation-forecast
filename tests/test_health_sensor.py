@@ -1,4 +1,3 @@
-
 class FakeCoordinator:
     last_update_success = True
     last_error = None
