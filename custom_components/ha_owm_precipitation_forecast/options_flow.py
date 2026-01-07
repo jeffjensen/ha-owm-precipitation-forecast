@@ -11,9 +11,20 @@ class OWMPrecipitationOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        schema = vol.Schema({
-            vol.Optional(CONF_SCAN_INTERVAL, default=self._entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)):
-                vol.In([900, 1800, 3600, 14400, 28800, 43200, 86400]),
-            vol.Optional(CONF_SNOW_RATIOS, default=self._entry.options.get(CONF_SNOW_RATIOS, DEFAULT_SNOW_RATIOS)): dict,
-        })
+        schema = vol.Schema(
+            {
+                vol.Optional(
+                    CONF_SCAN_INTERVAL,
+                    default=self._entry.options.get(
+                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                    ),
+                ): vol.In([900, 1800, 3600, 14400, 28800, 43200, 86400]),
+                vol.Optional(
+                    CONF_SNOW_RATIOS,
+                    default=self._entry.options.get(
+                        CONF_SNOW_RATIOS, DEFAULT_SNOW_RATIOS
+                    ),
+                ): dict,
+            }
+        )
         return self.async_show_form(step_id="init", data_schema=schema)

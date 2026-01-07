@@ -1,6 +1,8 @@
 [tool.ruff]
-select = ["E", "F", "B"]
 line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
 
 [tool.mypy]
 python_version = "3.12"

@@ -1,7 +1,16 @@
 from __future__ import annotations
 import voluptuous as vol
 from homeassistant import config_entries
-from .const import DOMAIN, CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CONF_ENABLE_RAIN, CONF_ENABLE_SNOW, DEFAULT_ENABLE_RAIN, DEFAULT_ENABLE_SNOW
+from .const import (
+    DOMAIN,
+    CONF_API_KEY,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
+    CONF_ENABLE_RAIN,
+    CONF_ENABLE_SNOW,
+    DEFAULT_ENABLE_RAIN,
+    DEFAULT_ENABLE_SNOW,
+)
 
 class OWMPrecipitationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
