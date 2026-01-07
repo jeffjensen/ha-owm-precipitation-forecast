@@ -5,12 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-from homeassistant import config_entries
-from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
-from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
-
-from .const import (
+from const import (
     CONF_API_KEY,
     CONF_LOCATION_NAME,
     DOMAIN,
@@ -19,6 +14,10 @@ from .const import (
     ERROR_INVALID_API_KEY,
     # ERROR_INVALID_LOCATION,
 )
+from homeassistant import config_entries
+from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
+from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 
 
 class OWMPrecipitationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
