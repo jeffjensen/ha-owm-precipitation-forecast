@@ -1,30 +1,27 @@
-
+from __future__ import annotations
 import logging
 from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .owm_client import OpenWeatherMapClient
-from .parser import parse_forecast
-from .snow_ratio import SnowRatioCalculator
+from homeassistant.core import HomeAssistant
+from .owm_client import OWMClient
 
 _LOGGER = logging.getLogger(__name__)
 
-class OWMPrecipitationCoordinator(DataUpdateCoordinator):
-    def __init__(self, hass, api_key, lat, lon, interval, snow_ratios):
-        session = hass.helpers.aiohttp_client.async_get_clientsession(hass)
-        self._client = OpenWeatherMapClient(api_key, session)
-        self._lat = lat
-        self._lon = lon
-        self._snow_calc = SnowRatioCalculator(snow_ratios)
+class OWMForecastCoordinator(DataUpdateCoordinator):
+    def __init__(self, hass: HomeAssistant, client: OWMClient, update_interval: int):
         super().__init__(
             hass,
             _LOGGER,
-            name="OWM Precipitation Forecast",
-            update_interval=timedelta(seconds=interval),
+            name="OWM Precipitation Forecast Coordinator",
+            update_interval=timedelta(seconds=update_interval),
         )
+        self._client = client
+        self.last_error: str | None = None
 
     async def _async_update_data(self):
         try:
-            raw = await self._client.fetch_forecast(self._lat, self._lon)
-            return parse_forecast(raw, self._snow_calc)
+            self.last_error = None
+            return await self._client.async_get_forecast()
         except Exception as err:
+            self.last_error = str(err)
             raise UpdateFailed(err) from err
