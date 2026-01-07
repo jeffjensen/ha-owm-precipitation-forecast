@@ -19,13 +19,13 @@ DEFAULT_ENABLE_SNOW: Final = True
 
 # Temperature-Adjusted Snow Ratio Defaults (Minnesota)
 # Ratios represent: 1 inch of rain = X inches of snow at that temperature
-DEFAULT_COLD_TEMP_THRESHOLD_F: Final = 25  # Below 25°F
+DEFAULT_COLD_TEMP_THRESHOLD_F: Final = 25  # Below 25ï¿½F
 DEFAULT_COLD_TEMP_RATIO: Final = 15.0  # 15:1 ratio for very cold snow
 
-DEFAULT_WARM_TEMP_THRESHOLD_F: Final = 32  # Above 32°F
+DEFAULT_WARM_TEMP_THRESHOLD_F: Final = 32  # Above 32ï¿½F
 DEFAULT_WARM_TEMP_RATIO: Final = 5.0  # 5:1 ratio for wet snow
 
-DEFAULT_TRANSITIONAL_TEMP_RATIO: Final = 10.0  # 10:1 ratio (25-32°F)
+DEFAULT_TRANSITIONAL_TEMP_RATIO: Final = 10.0  # 10:1 ratio (25-32ï¿½F)
 
 # Polling Intervals (minutes)
 POLLING_INTERVALS: Final = [15, 30, 60, 240, 480, 720, 1440]
@@ -42,8 +42,8 @@ POLLING_INTERVAL_NAMES: Final = {
 # Unit of Measurement
 UNIT_INCHES: Final = "in"
 UNIT_MILLIMETERS: Final = "mm"
-UNIT_CELSIUS: Final = "°C"
-UNIT_FAHRENHEIT: Final = "°F"
+UNIT_CELSIUS: Final = "ï¿½C"
+UNIT_FAHRENHEIT: Final = "ï¿½F"
 
 # Conversion Factors
 MM_TO_INCHES: Final = 0.0393701  # 1 mm = 0.0393701 inches
@@ -116,4 +116,3 @@ DATA_ENTITIES: Final = "entities"
 HEALTH_HEALTHY: Final = "Healthy"
 HEALTH_UNHEALTHY: Final = "Unhealthy"
 HEALTH_UNKNOWN: Final = "Unknown"
-
