@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Any
 import logging
-from typing import Any
 from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.core import HomeAssistant

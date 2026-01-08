@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List
 from .model import HourlyPrecipitation, DailyPrecipitation, ForecastBundle
 from .snow_ratio import SnowRatioCalculator
-from typing import Any
 
 def _mm_to_in(mm: float) -> float:
     return mm / 25.4
