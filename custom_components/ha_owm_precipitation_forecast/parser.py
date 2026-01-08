@@ -1,6 +1,6 @@
 
 from datetime import datetime
-from typing import Dict, List
+from typing import List
 from .model import HourlyPrecipitation, DailyPrecipitation, ForecastBundle
 from .snow_ratio import SnowRatioCalculator
 
