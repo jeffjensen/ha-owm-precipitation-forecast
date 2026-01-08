@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Any
 import logging
+from typing import Any
 from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.core import HomeAssistant
@@ -19,7 +20,7 @@ class OWMForecastCoordinator(DataUpdateCoordinator):
         self._client = client
         self.last_error: str | None = None
 
-    async def _async_update_data(self) -> Any:
+    async def _async_update_data(self) -> dict[str, Any]:
         try:
             self.last_error = None
             return await self._client.async_get_forecast()

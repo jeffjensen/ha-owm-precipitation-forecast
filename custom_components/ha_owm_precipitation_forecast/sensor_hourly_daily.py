@@ -10,7 +10,7 @@ class OWMHourlyRainSensor(CoordinatorEntity, SensorEntity):
         self._attr_name = f"{NAME_PREFIX}{location}_hourly_rain"
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         if not self.coordinator.data:
             return None
         return self.coordinator.data.hourly[0].rain_in
@@ -23,7 +23,7 @@ class OWMDailySnowSensor(CoordinatorEntity, SensorEntity):
         self._attr_name = f"{NAME_PREFIX}{location}_daily_snow"
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         if not self.coordinator.data:
             return None
         return self.coordinator.data.daily[0].snow_in

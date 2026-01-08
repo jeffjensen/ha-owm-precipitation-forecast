@@ -10,7 +10,7 @@ class OWMPrecipitationHealthSensor(CoordinatorEntity, SensorEntity):
         self._attr_name = f"{NAME_PREFIX}health"
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         if self.coordinator.last_update_success:
             return "ok"
         return "error"

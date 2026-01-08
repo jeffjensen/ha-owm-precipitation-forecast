@@ -15,7 +15,7 @@ class OWMNext24hRainSensor(OWMBaseSensor):
         super().__init__(coordinator, f"{location}_rain_next24h")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         if not self.coordinator.data:
             return None
         return round(sum(h.rain_in for h in self.coordinator.data.hourly[:24]), 2)
@@ -25,7 +25,7 @@ class OWMNext24hSnowSensor(OWMBaseSensor):
         super().__init__(coordinator, f"{location}_snow_next24h")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         if not self.coordinator.data:
             return None
         return round(sum(h.snow_in for h in self.coordinator.data.hourly[:24]), 2)

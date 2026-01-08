@@ -14,7 +14,7 @@ class HourlyRainSensor(_BasePrecipSensor):
         super().__init__(coordinator, f"{NAME_PREFIX}{location}_hourly_rain")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         return self.coordinator.data.hourly[0].rain_in if self.coordinator.data else None
 
 class HourlySnowSensor(_BasePrecipSensor):
@@ -22,7 +22,7 @@ class HourlySnowSensor(_BasePrecipSensor):
         super().__init__(coordinator, f"{NAME_PREFIX}{location}_hourly_snow")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         return self.coordinator.data.hourly[0].snow_in if self.coordinator.data else None
 
 class DailyRainSensor(_BasePrecipSensor):
@@ -30,7 +30,7 @@ class DailyRainSensor(_BasePrecipSensor):
         super().__init__(coordinator, f"{NAME_PREFIX}{location}_daily_rain")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         return self.coordinator.data.daily[0].rain_in if self.coordinator.data else None
 
 class DailySnowSensor(_BasePrecipSensor):
@@ -38,7 +38,7 @@ class DailySnowSensor(_BasePrecipSensor):
         super().__init__(coordinator, f"{NAME_PREFIX}{location}_daily_snow")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         return self.coordinator.data.daily[0].snow_in if self.coordinator.data else None
 
 class Next24hRainSensor(_BasePrecipSensor):
@@ -46,7 +46,7 @@ class Next24hRainSensor(_BasePrecipSensor):
         super().__init__(coordinator, f"{NAME_PREFIX}{location}_next24h_rain")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         if not self.coordinator.data:
             return None
         return sum(h.rain_in for h in self.coordinator.data.hourly[:24])
@@ -56,7 +56,7 @@ class Next24hSnowSensor(_BasePrecipSensor):
         super().__init__(coordinator, f"{NAME_PREFIX}{location}_next24h_snow")
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         if not self.coordinator.data:
             return None
         return sum(h.snow_in for h in self.coordinator.data.hourly[:24])
