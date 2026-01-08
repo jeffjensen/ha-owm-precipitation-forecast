@@ -1,29 +1,19 @@
 from __future__ import annotations
-import voluptuous as vol
+
+from typing import Any
 from homeassistant import config_entries
-from .const import (
-    DOMAIN,
-    CONF_API_KEY,
-    CONF_LATITUDE,
-    CONF_LONGITUDE,
-    CONF_ENABLE_RAIN,
-    CONF_ENABLE_SNOW,
-    DEFAULT_ENABLE_RAIN,
-    DEFAULT_ENABLE_SNOW,
-)
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResult
 
-class OWMPrecipitationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 1
+from .const import DOMAIN
 
-    async def async_step_user(self, user_input=None) -> bool:
+
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[misc]
+    async def async_step_user(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> FlowResult:
         if user_input is not None:
-            return self.async_create_entry(title="OWM Precipitation Forecast", data=user_input)
+            return self.async_create_entry(title="OWM Precipitation", data=user_input)
 
-        schema = vol.Schema({
-            vol.Required(CONF_API_KEY): str,
-            vol.Required(CONF_LATITUDE): float,
-            vol.Required(CONF_LONGITUDE): float,
-            vol.Optional(CONF_ENABLE_RAIN, default=DEFAULT_ENABLE_RAIN): bool,
-            vol.Optional(CONF_ENABLE_SNOW, default=DEFAULT_ENABLE_SNOW): bool,
-        })
-        return self.async_show_form(step_id="user", data_schema=schema)
+        return self.async_show_form(step_id="user", data_schema=None)

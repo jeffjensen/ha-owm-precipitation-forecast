@@ -1,62 +1,24 @@
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import NAME_PREFIX, UNIT_INCHES
+from __future__ import annotations
 
-class _BasePrecipSensor(CoordinatorEntity, SensorEntity):
-    _attr_native_unit_of_measurement = UNIT_INCHES
+from typing import Any
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-    def __init__(self, coordinator, name):
-        super().__init__(coordinator)
-        self._attr_name = name
+from .coordinator import OWMPrecipitationCoordinator
+from .sensor import OWMPrecipitationSensor
 
-class HourlyRainSensor(_BasePrecipSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{NAME_PREFIX}{location}_hourly_rain")
 
-    @property
-    def native_value(self) -> float | None:
-        return self.coordinator.data.hourly[0].rain_in if self.coordinator.data else None
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    coordinator: OWMPrecipitationCoordinator = hass.data[entry.domain][entry.entry_id]
 
-class HourlySnowSensor(_BasePrecipSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{NAME_PREFIX}{location}_hourly_snow")
-
-    @property
-    def native_value(self) -> float | None:
-        return self.coordinator.data.hourly[0].snow_in if self.coordinator.data else None
-
-class DailyRainSensor(_BasePrecipSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{NAME_PREFIX}{location}_daily_rain")
-
-    @property
-    def native_value(self) -> float | None:
-        return self.coordinator.data.daily[0].rain_in if self.coordinator.data else None
-
-class DailySnowSensor(_BasePrecipSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{NAME_PREFIX}{location}_daily_snow")
-
-    @property
-    def native_value(self) -> float | None:
-        return self.coordinator.data.daily[0].snow_in if self.coordinator.data else None
-
-class Next24hRainSensor(_BasePrecipSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{NAME_PREFIX}{location}_next24h_rain")
-
-    @property
-    def native_value(self) -> float | None:
-        if not self.coordinator.data:
-            return None
-        return sum(h.rain_in for h in self.coordinator.data.hourly[:24])
-
-class Next24hSnowSensor(_BasePrecipSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{NAME_PREFIX}{location}_next24h_snow")
-
-    @property
-    def native_value(self) -> float | None:
-        if not self.coordinator.data:
-            return None
-        return sum(h.snow_in for h in self.coordinator.data.hourly[:24])
+    async_add_entities(
+        [
+            OWMPrecipitationSensor(coordinator, "rain"),
+            OWMPrecipitationSensor(coordinator, "snow"),
+        ]
+    )

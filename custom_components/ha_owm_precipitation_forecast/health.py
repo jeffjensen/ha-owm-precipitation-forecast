@@ -1,23 +1,13 @@
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import NAME_PREFIX
+from __future__ import annotations
 
-class OWMPrecipitationHealthSensor(CoordinatorEntity, SensorEntity):
-    _attr_icon = "mdi:heart-pulse"
+from typing import Any
+from homeassistant.core import HomeAssistant, callback
 
-    def __init__(self, coordinator):
-        super().__init__(coordinator)
-        self._attr_name = f"{NAME_PREFIX}health"
 
-    @property
-    def native_value(self) -> float | None:
-        if self.coordinator.last_update_success:
-            return "ok"
-        return "error"
+@callback
+def async_register(hass: HomeAssistant) -> None:
+    return None
 
-    @property
-    def extra_state_attributes(self):
-        return {
-            "last_error": self.coordinator.last_error,
-            "last_update_success": self.coordinator.last_update_success,
-        }
+
+def async_healthcheck(hass: HomeAssistant) -> float | None:
+    return None

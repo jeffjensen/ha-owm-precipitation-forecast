@@ -1,31 +1,24 @@
+from __future__ import annotations
 
-from homeassistant.components.sensor import SensorEntity
+from typing import Any
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from .const import NAME_PREFIX, UNIT_INCHES
+from homeassistant.helpers.entity import SensorEntity
 
-class OWMBaseSensor(CoordinatorEntity, SensorEntity):
-    _attr_native_unit_of_measurement = UNIT_INCHES
+from .coordinator import OWMPrecipitationCoordinator
 
-    def __init__(self, coordinator, name):
+
+class OWMPrecipitationSensor(
+    CoordinatorEntity[OWMPrecipitationCoordinator], SensorEntity
+):
+    def __init__(
+        self,
+        coordinator: OWMPrecipitationCoordinator,
+        precip_type: str,
+    ) -> None:
         super().__init__(coordinator)
-        self._attr_name = f"{NAME_PREFIX}{name}"
-
-class OWMNext24hRainSensor(OWMBaseSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{location}_rain_next24h")
+        self._type = precip_type
+        self._attr_name = f"OWM {precip_type.capitalize()} Forecast"
 
     @property
     def native_value(self) -> float | None:
-        if not self.coordinator.data:
-            return None
-        return round(sum(h.rain_in for h in self.coordinator.data.hourly[:24]), 2)
-
-class OWMNext24hSnowSensor(OWMBaseSensor):
-    def __init__(self, coordinator, location):
-        super().__init__(coordinator, f"{location}_snow_next24h")
-
-    @property
-    def native_value(self) -> float | None:
-        if not self.coordinator.data:
-            return None
-        return round(sum(h.snow_in for h in self.coordinator.data.hourly[:24]), 2)
+        return self.coordinator.data.get(self._type)

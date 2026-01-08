@@ -19,7 +19,7 @@ class OWMForecastCoordinator(DataUpdateCoordinator):
         self._client = client
         self.last_error: str | None = None
 
-    async def _async_update_data(self) -> dict[str, Any]:
+    async def _async_update_data(self) -> dict[str, float]:
         try:
             self.last_error = None
             return await self._client.async_get_forecast()
