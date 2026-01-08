@@ -7,7 +7,7 @@ from .snow_ratio import SnowRatioCalculator
 def _mm_to_in(mm: float) -> float:
     return mm / 25.4
 
-def parse_forecast(data: Dict, snow_calc: SnowRatioCalculator) -> ForecastBundle:
+def parse_forecast(data: dict[str, float], snow_calc: SnowRatioCalculator) -> ForecastBundle:
     hourly: List[HourlyPrecipitation] = []
     daily: List[DailyPrecipitation] = []
 
