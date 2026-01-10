@@ -4,11 +4,12 @@ Professional Build System for Home Assistant OWM Precipitation Forecast Integrat
 Single command verification: validate → format → lint → test → coverage
 """
 
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
 from typing import List, Optional
+
 
 class BuildSystem:
     def __init__(self):
@@ -29,7 +30,7 @@ class BuildSystem:
             self._print_help()
             return 1
 
-        cmd = args[^6_0]
+        cmd = args[0]
         if cmd in self.commands:
             print(f"🚀 Running: build.py {cmd}")
             try:
