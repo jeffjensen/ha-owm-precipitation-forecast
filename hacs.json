@@ -1,0 +1,10 @@
+{
+  "name": "OWM Precipitation Forecast",
+  "content_in_root": false,
+  "filename": "owm_precipitation_forecast",
+  "render_readme": true,
+  "homeassistant": "2024.1.0",
+  "zip_release": true,
+  "hide_default_branch": false,
+  "country": ["US", "CA", "GB", "AU", "NZ", "IE", "DE", "FR", "ES", "IT", "NL", "BE", "CH", "AT", "NO", "SE", "DK", "FI", "PL", "CZ", "SK", "HU", "RO", "BG", "GR", "PT", "LU", "SI", "HR", "LT", "LV", "EE", "IS", "JP", "KR", "CN", "TW", "HK", "SG", "MY", "TH", "VN", "PH", "ID", "IN", "BR", "MX", "AR", "CL", "CO", "PE", "ZA", "IL", "TR", "RU", "UA", "BY"]
+}

@@ -1,0 +1,655 @@
+= OpenWeatherMap Precipitation Forecast Integration
+:toc: macro
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+image:https://img.shields.io/badge/HACS-Default-41BDF5.svg[HACS,link=https://hacs.xyz]
+image:https://img.shields.io/github/v/release/jeffjensen/ha-owm-precipitation-forecast-integration[GitHub release]
+image:https://img.shields.io/github/license/jeffjensen/ha-owm-precipitation-forecast-integration[License]
+image:https://img.shields.io/github/workflow/status/jeffjensen/ha-owm-precipitation-forecast-integration/CI[CI Status]
+
+A comprehensive Home Assistant integration providing detailed precipitation forecasts with temperature-adjusted snow calculations using OpenWeatherMap's One Call API 3.0.
+
+toc::[]
+
+== Features
+
+=== Precipitation Tracking
+
+* *Rain Forecasts* - Hourly, daily, and 24-hour accumulation
+* *Snow Forecasts* - Temperature-adjusted snow calculations
+* *Multiple Locations* - Configure unlimited forecast locations
+* *Flexible Updates* - Polling intervals from 15 minutes to 24 hours
+
+=== Advanced Calculations
+
+* *Temperature-Adjusted Snow Ratios* - Configurable liquid-to-snow conversion
+* *Realistic Snow Estimates* - Based on atmospheric conditions
+* *Precipitation Probability* - Chance of precipitation for each period
+* *Peak Detection* - Identifies hours with maximum precipitation
+
+=== Integration Features
+
+* *Rich Attributes* - Chart-ready hourly and daily breakdowns
+* *Health Monitoring* - Built-in integration status sensor
+* *Service Calls* - Manual refresh and error clearing
+* *Event Firing* - Automation-ready events
+* *Rate Limiting* - Automatic API usage tracking
+
+=== User Experience
+
+* *UI Configuration* - Complete setup through Home Assistant UI
+* *Options Flow* - Modify settings without reinstalling
+* *Translations* - English translations included
+* *Dashboard Ready* - Works with all standard cards
+
+== Requirements
+
+* Home Assistant 2024.1.0 or newer
+* OpenWeatherMap API key with One Call API 3.0 access
+* Internet connection for API calls
+
+NOTE: OpenWeatherMap's One Call API 3.0 provides 1,000 free API calls per day.
+
+== Installation
+
+=== HACS (Recommended)
+
+. Open HACS in Home Assistant
+. Click *Integrations*
+. Click the three dots (⋮) in the top right
+. Select *Custom repositories*
+. Add repository URL: `https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration`
+. Select category: *Integration*
+. Click *Add*
+. Search for "OWM Precipitation Forecast"
+. Click *Install*
+. Restart Home Assistant
+
+=== Manual Installation
+
+. Download the latest release from GitHub
+. Extract the `owm_precipitation_forecast` folder
+. Copy to your Home Assistant `custom_components` directory:
++
+----
+custom_components/
+└── owm_precipitation_forecast/
+    ├── __init__.py
+    ├── manifest.json
+    └── ...
+----
+. Restart Home Assistant
+
+== Configuration
+
+=== Initial Setup
+
+. Go to *Settings* → *Devices & Services*
+. Click *+ Add Integration*
+. Search for "OWM Precipitation Forecast"
+. Enter your configuration:
+   * *API Key* - Your OpenWeatherMap API key
+   * *Location Name* - Friendly name (e.g., "Home")
+   * *Latitude/Longitude* - Location coordinates
+   * *Enable Rain* - Track rain (default: Yes)
+   * *Enable Snow* - Track snow (default: Yes)
+   * *Polling Interval* - Update frequency (default: 1 hour)
+
+=== Getting an API Key
+
+. Visit https://openweathermap.org/api
+. Sign up for a free account
+. Subscribe to One Call API 3.0 (free tier: 1,000 calls/day)
+. Copy your API key
+
+WARNING: Keep your API key secure. Never share it publicly.
+
+=== Modifying Settings
+
+. Go to *Settings* → *Devices & Services*
+. Find "OWM Precipitation Forecast"
+. Click *Configure*
+. Modify options:
+   * Toggle rain/snow tracking
+   * Change polling interval
+   * Adjust snow ratios (advanced)
+
+== Sensors
+
+The integration creates 7 sensors per location:
+
+[cols="2,3,2,3"]
+|===
+|Sensor |Description |Unit |State Class
+
+|Hourly Rain
+|Precipitation in next hour
+|inches
+|measurement
+
+|Hourly Snow
+|Snow in next hour
+|inches
+|measurement
+
+|Daily Rain
+|Rain total for today
+|inches
+|measurement
+
+|Daily Snow
+|Snow total for today
+|inches
+|measurement
+
+|Next 24h Rain
+|Rain in next 24 hours
+|inches
+|measurement
+
+|Next 24h Snow
+|Snow in next 24 hours
+|inches
+|measurement
+
+|Health
+|Integration status
+|status
+|diagnostic
+|===
+
+=== Sensor Attributes
+
+Each precipitation sensor includes:
+
+* `location` - Location name
+* `coordinates` - Latitude and longitude
+* `last_update` - Last update timestamp
+* `forecast_time` - Time of forecast
+* `temperature` - Current temperature
+* `hourly_breakdown` - 24 hours of detailed data
+* `description` - Human-readable amount (Light/Moderate/Heavy)
+
+Health sensor includes:
+
+* `api_calls_today` - API calls made today
+* `api_calls_remaining` - Calls remaining
+* `error_count` - Number of errors
+* `last_error` - Most recent error message
+* `last_update` - Last successful update
+* `next_update` - Next scheduled update
+
+== Temperature-Adjusted Snow Ratios
+
+The integration uses realistic liquid-to-snow conversion ratios based on temperature:
+
+[cols="2,2,3"]
+|===
+|Temperature |Ratio |Snow Type
+
+|32°F+
+|10:1
+|Wet, heavy snow
+
+|28-31°F
+|12:1
+|Wet snow
+
+|24-27°F
+|15:1
+|Average snow
+
+|20-23°F
+|20:1
+|Light snow
+
+|15-19°F
+|25:1
+|Lighter snow
+
+|10-14°F
+|30:1
+|Fluffy snow
+
+|0-9°F
+|40:1
+|Very light snow
+
+|Below 0°F
+|50:1
+|Powder
+|===
+
+TIP: These ratios can be customized in the integration options.
+
+=== Example Calculation
+
+With 0.1 inches of liquid precipitation:
+
+* At 32°F: 0.1 × 10 = *1.0 inches* of wet snow
+* At 20°F: 0.1 × 20 = *2.0 inches* of light snow
+* At 0°F: 0.1 × 40 = *4.0 inches* of fluffy snow
+* At -10°F: 0.1 × 50 = *5.0 inches* of powder
+
+== Dashboard Examples
+
+=== Entities Card
+
+[source,yaml]
+----
+type: entities
+title: Precipitation Forecast
+entities:
+  - entity: sensor.owm_precipitation_forecast_home_next24h_rain
+    name: Next 24h Rain
+    icon: mdi:weather-rainy
+  - entity: sensor.owm_precipitation_forecast_home_next24h_snow
+    name: Next 24h Snow
+    icon: mdi:weather-snowy
+  - entity: sensor.owm_precipitation_forecast_home_hourly_rain
+    name: Next Hour Rain
+  - entity: sensor.owm_precipitation_forecast_home_hourly_snow
+    name: Next Hour Snow
+  - type: divider
+  - entity: sensor.owm_precipitation_forecast_home_health
+    name: Integration Status
+----
+
+=== Glance Card
+
+[source,yaml]
+----
+type: glance
+title: Weather Forecast
+entities:
+  - entity: sensor.owm_precipitation_forecast_home_hourly_rain
+    name: Hour Rain
+  - entity: sensor.owm_precipitation_forecast_home_hourly_snow
+    name: Hour Snow
+  - entity: sensor.owm_precipitation_forecast_home_next24h_rain
+    name: 24h Rain
+  - entity: sensor.owm_precipitation_forecast_home_next24h_snow
+    name: 24h Snow
+----
+
+=== Chart Card (ApexCharts)
+
+[source,yaml]
+----
+type: custom:apexcharts-card
+header:
+  title: Hourly Rain Forecast
+  show: true
+series:
+  - entity: sensor.owm_precipitation_forecast_home_next24h_rain
+    name: Rain
+    data_generator: |
+      return entity.attributes.hourly_breakdown.map(h => {
+        return [new Date(h.time).getTime(), h.rain];
+      });
+----
+
+=== Markdown Card
+
+[source,yaml]
+----
+type: markdown
+content: >
+  ## Weather Forecast
+
+  **Next Hour:**
+
+  Rain: {{ states('sensor.owm_precipitation_forecast_home_hourly_rain') }} in
+
+  Snow: {{ states('sensor.owm_precipitation_forecast_home_hourly_snow') }} in
+
+
+  **Next 24 Hours:**
+
+  Rain: {{ states('sensor.owm_precipitation_forecast_home_next24h_rain') }} in
+
+  Snow: {{ states('sensor.owm_precipitation_forecast_home_next24h_snow') }} in
+
+
+  **Status:** {{ states('sensor.owm_precipitation_forecast_home_health') }}
+----
+
+== Automation Examples
+
+=== Heavy Rain Alert
+
+[source,yaml]
+----
+automation:
+  - alias: "Alert on Heavy Rain"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_next24h_rain
+        above: 2.0
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Heavy Rain Expected"
+          message: >
+            {{ states('sensor.owm_precipitation_forecast_home_next24h_rain') }}
+            inches of rain forecast in the next 24 hours.
+----
+
+=== Snow Day Notification
+
+[source,yaml]
+----
+automation:
+  - alias: "Snow Day Alert"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_next24h_snow
+        above: 6.0
+    action:
+      - service: notify.family
+        data:
+          title: "Significant Snowfall Expected"
+          message: >
+            {{ states('sensor.owm_precipitation_forecast_home_next24h_snow') }}
+            inches of snow forecast. Plan accordingly!
+----
+
+=== Morning Weather Report
+
+[source,yaml]
+----
+automation:
+  - alias: "Morning Weather Report"
+    trigger:
+      - platform: time
+        at: "07:00:00"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Today's Weather"
+          message: >
+            Rain: {{ states('sensor.owm_precipitation_forecast_home_daily_rain') }} in
+
+            Snow: {{ states('sensor.owm_precipitation_forecast_home_daily_snow') }} in
+----
+
+=== API Error Alert
+
+[source,yaml]
+----
+automation:
+  - alias: "Weather Integration Error"
+    trigger:
+      - platform: state
+        entity_id: sensor.owm_precipitation_forecast_home_health
+        to: "error"
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "Weather Integration Error"
+          message: >
+            {{ state_attr('sensor.owm_precipitation_forecast_home_health', 'last_error') }}
+----
+
+== Services
+
+=== update_forecast
+
+Manually trigger a forecast update for all configured locations.
+
+[source,yaml]
+----
+service: owm_precipitation_forecast.update_forecast
+----
+
+*Use Cases:*
+
+* Manual refresh button in dashboard
+* Update before leaving for commute
+* Refresh after API key change
+
+=== clear_errors
+
+Clear error counters and reset health status for all locations.
+
+[source,yaml]
+----
+service: owm_precipitation_forecast.clear_errors
+----
+
+*Use Cases:*
+
+* After fixing API key issues
+* After network is restored
+* Periodic maintenance automation
+
+== Troubleshooting
+
+=== Integration Won't Load
+
+*Symptoms:* Integration doesn't appear or fails to load
+
+*Solutions:*
+
+. Check Home Assistant logs for errors
+. Verify Home Assistant version is 2024.1.0+
+. Ensure integration files are in correct location
+. Restart Home Assistant completely
+. Check HACS for update notifications
+
+=== API Key Invalid
+
+*Symptoms:* Sensors show "unavailable", health sensor shows "error"
+
+*Solutions:*
+
+. Verify API key is correct
+. Ensure One Call API 3.0 subscription is active
+. Check API key hasn't expired
+. Visit OpenWeatherMap dashboard to verify account status
+. Try regenerating API key
+
+=== No Data / All Zeros
+
+*Symptoms:* Sensors show 0.0 or no precipitation
+
+*Solutions:*
+
+. This is normal if no precipitation is forecast
+. Check OpenWeatherMap website for same location
+. Verify location coordinates are correct
+. Check that forecast data is available for your region
+
+=== Rate Limit Exceeded
+
+*Symptoms:* Health sensor shows "error", mentions rate limit
+
+*Solutions:*
+
+. You've exceeded 1,000 API calls per day
+. Wait for daily reset (midnight UTC)
+. Increase polling interval (e.g., 4 hours instead of 15 minutes)
+. Consider OpenWeatherMap paid plan for more calls
+
+=== Sensors Unavailable
+
+*Symptoms:* Sensors show "unavailable"
+
+*Solutions:*
+
+. Check internet connection
+. Verify OpenWeatherMap API is operational
+. Check Home Assistant logs for specific errors
+. Try manual refresh: `owm_precipitation_forecast.update_forecast`
+. Check health sensor for error details
+
+=== Wrong Snow Amounts
+
+*Symptoms:* Snow calculations seem incorrect
+
+*Solutions:*
+
+. Verify temperature-adjusted ratios in options
+. Check that temperatures are being read correctly
+. Review sensor attributes for temperature data
+. Adjust snow ratios if needed for your region
+. Remember: ratios are estimates based on typical conditions
+
+== API Usage
+
+=== Free Tier Limits
+
+* *1,000 calls per day*
+* Resets at midnight UTC
+* Warning at 800 calls (80%)
+* Integration automatically throttles at limit
+
+=== Call Frequency by Polling Interval
+
+[cols="2,2,2"]
+|===
+|Polling Interval |Calls per Day |Percentage
+
+|15 minutes
+|96
+|9.6%
+
+|30 minutes
+|48
+|4.8%
+
+|1 hour (default)
+|24
+|2.4%
+
+|4 hours
+|6
+|0.6%
+
+|8 hours
+|3
+|0.3%
+
+|12 hours
+|2
+|0.2%
+
+|24 hours
+|1
+|0.1%
+|===
+
+TIP: Default 1-hour polling uses only 2.4% of free tier.
+
+=== Monitoring Usage
+
+Check the health sensor attributes:
+
+* `api_calls_today` - Calls made today
+* `api_calls_remaining` - Calls left for today
+
+== Advanced Configuration
+
+=== Custom Snow Ratios
+
+. Go to integration options
+. Select "Configure Snow Ratios"
+. Adjust ratios for each temperature range
+. Click "Submit"
+
+*Valid Range:* 5.0 to 100.0
+
+TIP: Research local snow-to-liquid ratios for your region.
+
+=== Multiple Locations
+
+. Add integration multiple times
+. Use unique names for each location
+. Each location has independent settings
+. Each location counts toward API usage
+
+*Example:*
+
+* Home (45.0, -93.0)
+* Cabin (46.5, -94.2)
+* Work (44.8, -93.3)
+
+=== Polling Interval Strategy
+
+*For Active Monitoring:* 15-30 minutes
+
+* Real-time updates
+* Good for storm tracking
+* Uses more API calls
+
+*For General Use:* 1-4 hours (default)
+
+* Balance of freshness and efficiency
+* Recommended for most users
+
+*For Occasional Checks:* 12-24 hours
+
+* Minimal API usage
+* Good for casual monitoring
+
+== Development
+
+=== Contributing
+
+See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] for development guidelines.
+
+=== Building and Testing
+
+[source,bash]
+----
+# Set up development environment
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+
+# Run tests
+pytest tests --cov
+
+# Run quality checks
+python scripts/build.py --all
+----
+
+See link:docs/DEVELOPMENT_SETUP.adoc[Development Setup] for details.
+
+== Support
+
+=== Getting Help
+
+* https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/issues[GitHub Issues]
+* https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/discussions[GitHub Discussions]
+* Home Assistant Community Forum
+
+=== Reporting Issues
+
+When reporting issues, please include:
+
+. Home Assistant version
+. Integration version
+. Error messages from logs
+. Health sensor attributes
+. Steps to reproduce
+
+== Changelog
+
+See link:CHANGELOG.md[CHANGELOG.md] for version history.
+
+== License
+
+This project is licensed under the MIT License - see the link:LICENSE[LICENSE] file for details.
+
+== Disclaimer
+
+This integration uses OpenWeatherMap data. Forecast accuracy depends on OpenWeatherMap's models. Always use official weather services for critical decisions.
+
+Snow calculations are estimates based on typical atmospheric conditions. Actual snow accumulation may vary based on local factors.
+
+---
+
+⭐ If you find this integration useful, please star the repository!

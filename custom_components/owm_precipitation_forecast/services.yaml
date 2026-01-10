@@ -1,0 +1,9 @@
+update_forecast:
+  name: Update Forecast
+  description: Manually trigger a forecast update for all configured locations.
+  fields: {}
+
+clear_errors:
+  name: Clear Errors
+  description: Clear error counters and reset health status for all configured locations.
+  fields: {}

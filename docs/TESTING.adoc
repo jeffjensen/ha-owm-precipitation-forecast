@@ -1,0 +1,749 @@
+= Testing Documentation
+:toc:
+:toclevels: 3
+:icons: font
+
+== Overview
+
+This document describes the testing strategy, test structure, and how to run tests for the OWM Precipitation Forecast integration.
+
+== Test Strategy
+
+The integration uses a comprehensive three-tier testing approach:
+
+1. *Unit Tests* - Test individual components in isolation
+2. *Integration Tests* - Test component interactions
+3. *Advanced Scenario Tests* - Test complex real-world scenarios
+
+=== Test Coverage Goals
+
+* *Minimum Coverage*: 90%
+* *Target Coverage*: 95%+
+* *Critical Paths*: 100%
+
+== Test Structure
+
+=== Directory Layout
+
+[source]
+----
+tests/
+├── __init__.py
+├── conftest.py              # Shared fixtures and configuration
+├── unit/                    # Unit tests
+│   ├── __init__.py
+│   ├── test_config_flow.py
+│   ├── test_sensor.py
+│   ├── test_coordinator.py
+│   └── test_api_client.py
+├── integration/             # Integration tests
+│   ├── __init__.py
+│   ├── test_setup.py
+│   ├── test_full_flow.py
+│   └── test_options_flow.py
+└── advanced/                # Advanced scenario tests
+    ├── __init__.py
+    ├── test_api_failures.py
+    ├── test_rate_limiting.py
+    ├── test_multiple_locations.py
+    └── test_edge_cases.py
+----
+
+=== Test Markers
+
+Tests are organized using pytest markers:
+
+[source,python]
+----
+@pytest.mark.unit         # Unit tests
+@pytest.mark.integration  # Integration tests
+@pytest.mark.advanced     # Advanced scenario tests
+----
+
+== Running Tests
+
+=== Quick Start
+
+==== Run All Tests
+
+[source,bash]
+----
+pytest tests -v
+----
+
+==== Run with Coverage
+
+[source,bash]
+----
+pytest tests --cov --cov-report=html
+----
+
+==== Run Specific Test Category
+
+[source,bash]
+----
+# Unit tests only
+pytest tests -m unit -v
+
+# Integration tests only
+pytest tests -m integration -v
+
+# Advanced tests only
+pytest tests -m advanced -v
+----
+
+=== Using Build Script
+
+==== All Tests with Coverage
+
+[source,bash]
+----
+python scripts/build.py --test
+----
+
+==== Tests Without Coverage
+
+[source,bash]
+----
+python scripts/build.py --test --no-coverage
+----
+
+==== Specific Test Markers
+
+[source,bash]
+----
+python scripts/build.py --test --test-markers unit
+python scripts/build.py --test --test-markers integration
+python scripts/build.py --test --test-markers advanced
+----
+
+=== Running Individual Tests
+
+==== Specific Test File
+
+[source,bash]
+----
+pytest tests/unit/test_sensor.py -v
+----
+
+==== Specific Test Class
+
+[source,bash]
+----
+pytest tests/unit/test_sensor.py::TestPrecipitationSensor -v
+----
+
+==== Specific Test Method
+
+[source,bash]
+----
+pytest tests/unit/test_sensor.py::TestPrecipitationSensor::test_hourly_rain -v
+----
+
+==== With Debugging Output
+
+[source,bash]
+----
+pytest tests/unit/test_sensor.py -v -s
+----
+
+=== VS Code Testing
+
+==== Test Explorer
+
+1. Click the Testing icon in the left sidebar (flask icon)
+2. Click "Refresh Tests"
+3. Navigate the test tree
+4. Click the play button to run tests
+
+==== Run Tests in Editor
+
+1. Open a test file
+2. Click the play button next to test functions
+3. View results inline
+
+==== Debug Tests
+
+1. Set breakpoints in test code
+2. Right-click test → "Debug Test"
+3. Use debug controls to step through code
+
+== Test Coverage
+
+=== Viewing Coverage
+
+==== HTML Report
+
+[source,bash]
+----
+pytest --cov --cov-report=html
+open htmlcov/index.html  # macOS
+xdg-open htmlcov/index.html  # Linux
+start htmlcov/index.html  # Windows
+----
+
+The HTML report shows:
+
+* Overall coverage percentage
+* Coverage per file
+* Line-by-line coverage
+* Missing lines highlighted
+
+==== Terminal Report
+
+[source,bash]
+----
+pytest --cov --cov-report=term-missing
+----
+
+Shows coverage with missing lines listed.
+
+==== XML Report
+
+[source,bash]
+----
+pytest --cov --cov-report=xml
+----
+
+Generates `coverage.xml` for CI/CD integration.
+
+=== Coverage Configuration
+
+Configuration in `pyproject.toml`:
+
+[source,toml]
+----
+[tool.coverage.run]
+source = ["custom_components/owm_precipitation_forecast"]
+branch = true
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+----
+
+=== Improving Coverage
+
+1. Run coverage report
+2. Identify uncovered lines
+3. Add tests for uncovered code
+4. Re-run coverage to verify
+
+Example:
+
+[source,bash]
+----
+# Run with missing lines
+pytest --cov --cov-report=term-missing
+
+# Identify gaps
+# Add tests
+# Verify
+pytest --cov --cov-report=html
+----
+
+== Writing Tests
+
+=== Unit Tests
+
+Test individual components in isolation.
+
+==== Example: Testing a Sensor
+
+[source,python]
+----
+import pytest
+from homeassistant.core import HomeAssistant
+from custom_components.owm_precipitation_forecast.sensor import (
+    HourlyRainSensor,
+)
+
+@pytest.mark.unit
+async def test_hourly_rain_sensor(hass: HomeAssistant) -> None:
+    """Test hourly rain sensor."""
+    coordinator = MockCoordinator()
+    sensor = HourlyRainSensor(coordinator, "Test Location")
+    
+    assert sensor.name == "owm_precipitation_forecast_test_location_hourly_rain"
+    assert sensor.unit_of_measurement == "in"
+    assert sensor.native_value == 0.5
+----
+
+==== Best Practices
+
+* Test one thing per test
+* Use descriptive test names
+* Mock external dependencies
+* Test both success and failure cases
+* Test edge cases
+
+=== Integration Tests
+
+Test component interactions.
+
+==== Example: Testing Config Flow
+
+[source,python]
+----
+import pytest
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
+
+@pytest.mark.integration
+async def test_config_flow_success(hass: HomeAssistant) -> None:
+    """Test successful config flow."""
+    result = await hass.config_entries.flow.async_init(
+        "owm_precipitation_forecast",
+        context={"source": "user"}
+    )
+    
+    assert result["type"] == FlowResultType.FORM
+    assert result["step_id"] == "user"
+    
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            "api_key": "test_key",
+            "location_name": "Test City",
+            "latitude": 45.0,
+            "longitude": -93.0,
+        }
+    )
+    
+    assert result["type"] == FlowResultType.CREATE_ENTRY
+    assert result["title"] == "Test City"
+----
+
+==== Best Practices
+
+* Test complete workflows
+* Verify state changes
+* Check side effects
+* Test error handling
+* Verify data flow
+
+=== Advanced Scenario Tests
+
+Test complex real-world scenarios.
+
+==== Example: Testing API Failures with Retry
+
+[source,python]
+----
+import pytest
+from aiohttp import ClientError
+from custom_components.owm_precipitation_forecast.api_client import (
+    OWMApiClient,
+)
+
+@pytest.mark.advanced
+async def test_api_retry_with_exponential_backoff(
+    hass: HomeAssistant,
+    mock_aiohttp_session,
+) -> None:
+    """Test API retry with exponential backoff."""
+    client = OWMApiClient("test_key", hass)
+    
+    # Simulate 3 failures then success
+    responses = [
+        ClientError("Network error"),
+        ClientError("Network error"),
+        ClientError("Network error"),
+        {"data": "success"},
+    ]
+    
+    mock_aiohttp_session.set_responses(responses)
+    
+    start_time = time.time()
+    result = await client.get_forecast(45.0, -93.0)
+    end_time = time.time()
+    
+    # Verify exponential backoff timing
+    # 1s + 2s + 4s = 7s minimum
+    assert end_time - start_time >= 7.0
+    assert result == {"data": "success"}
+    assert mock_aiohttp_session.call_count == 4
+----
+
+==== Best Practices
+
+* Test failure scenarios
+* Verify error recovery
+* Test rate limiting
+* Test concurrent operations
+* Test data consistency
+
+== Test Fixtures
+
+=== Common Fixtures
+
+Defined in `tests/conftest.py`:
+
+==== hass
+
+Home Assistant instance for testing.
+
+[source,python]
+----
+@pytest.fixture
+async def hass() -> HomeAssistant:
+    """Return Home Assistant instance."""
+    # Setup and return hass
+----
+
+==== mock_api_client
+
+Mocked API client.
+
+[source,python]
+----
+@pytest.fixture
+def mock_api_client() -> Mock:
+    """Return mocked API client."""
+    # Return mock with configured responses
+----
+
+==== mock_coordinator
+
+Mocked data update coordinator.
+
+[source,python]
+----
+@pytest.fixture
+def mock_coordinator() -> Mock:
+    """Return mocked coordinator."""
+    # Return mock with test data
+----
+
+=== Creating Custom Fixtures
+
+==== In conftest.py
+
+[source,python]
+----
+@pytest.fixture
+def sample_forecast_data() -> dict:
+    """Return sample forecast data."""
+    return {
+        "hourly": [
+            {"dt": 1234567890, "rain": {"1h": 0.5}},
+        ],
+        "daily": [
+            {"dt": 1234567890, "rain": 2.5, "snow": 0},
+        ],
+    }
+----
+
+==== In Test File
+
+[source,python]
+----
+@pytest.fixture
+def test_config() -> dict:
+    """Return test configuration."""
+    return {
+        "api_key": "test_key",
+        "latitude": 45.0,
+        "longitude": -93.0,
+    }
+----
+
+== Mocking
+
+=== Mocking External Services
+
+==== Mock API Calls
+
+[source,python]
+----
+@pytest.fixture
+def mock_owm_api(mocker):
+    """Mock OpenWeatherMap API."""
+    mock_response = {
+        "hourly": [...],
+        "daily": [...],
+    }
+    
+    return mocker.patch(
+        "custom_components.owm_precipitation_forecast.api_client.OWMApiClient.get_forecast",
+        return_value=mock_response,
+    )
+----
+
+==== Mock Time
+
+[source,python]
+----
+@pytest.fixture
+def mock_time(mocker):
+    """Mock time functions."""
+    fixed_time = datetime(2024, 1, 1, 12, 0, 0)
+    mocker.patch("datetime.datetime.now", return_value=fixed_time)
+    return fixed_time
+----
+
+=== Mocking Home Assistant Components
+
+[source,python]
+----
+@pytest.fixture
+def mock_config_entry(hass):
+    """Mock config entry."""
+    entry = MockConfigEntry(
+        domain="owm_precipitation_forecast",
+        data={
+            "api_key": "test_key",
+            "latitude": 45.0,
+            "longitude": -93.0,
+        },
+    )
+    entry.add_to_hass(hass)
+    return entry
+----
+
+== Async Testing
+
+The integration uses async/await extensively.
+
+=== Async Test Functions
+
+[source,python]
+----
+@pytest.mark.asyncio
+async def test_async_function():
+    """Test async function."""
+    result = await some_async_function()
+    assert result == expected
+----
+
+=== Async Fixtures
+
+[source,python]
+----
+@pytest.fixture
+async def async_fixture():
+    """Async fixture."""
+    resource = await setup_resource()
+    yield resource
+    await cleanup_resource(resource)
+----
+
+=== Testing Async Callbacks
+
+[source,python]
+----
+async def test_callback():
+    """Test callback execution."""
+    callback_called = False
+    
+    def callback():
+        nonlocal callback_called
+        callback_called = True
+    
+    await trigger_callback(callback)
+    assert callback_called
+----
+
+== Debugging Tests
+
+=== Using pytest -s
+
+Show print statements:
+
+[source,bash]
+----
+pytest tests/test_file.py -v -s
+----
+
+=== Using pdb
+
+Python debugger:
+
+[source,python]
+----
+def test_something():
+    import pdb; pdb.set_trace()
+    # Breakpoint here
+    assert something
+----
+
+Run with:
+
+[source,bash]
+----
+pytest tests/test_file.py -v -s
+----
+
+=== Using VS Code Debugger
+
+1. Set breakpoints in test file
+2. Right-click test → "Debug Test"
+3. Use debug controls
+
+=== Pytest Options
+
+[source,bash]
+----
+# Stop on first failure
+pytest tests -x
+
+# Show local variables on failure
+pytest tests -l
+
+# Increase verbosity
+pytest tests -vv
+
+# Show slowest tests
+pytest tests --durations=10
+----
+
+== Continuous Integration
+
+Tests run automatically on GitHub Actions.
+
+=== CI Workflow
+
+Runs on every push and PR:
+
+1. Lint checks
+2. Type checks
+3. Security checks
+4. Tests on Python 3.11 & 3.12
+5. Coverage upload to Codecov
+
+=== Viewing CI Results
+
+1. Go to GitHub repository
+2. Click "Actions" tab
+3. Select workflow run
+4. View test results
+
+=== Local CI Simulation
+
+Run same checks as CI:
+
+[source,bash]
+----
+python scripts/build.py --all
+----
+
+== Performance Testing
+
+=== Timing Tests
+
+[source,python]
+----
+import time
+
+def test_performance():
+    start = time.time()
+    result = expensive_operation()
+    duration = time.time() - start
+    
+    assert duration < 1.0  # Should complete in 1s
+----
+
+=== Using pytest-benchmark
+
+[source,python]
+----
+def test_benchmark(benchmark):
+    result = benchmark(function_to_test, arg1, arg2)
+    assert result == expected
+----
+
+== Common Issues
+
+=== Tests Hanging
+
+*Problem:* Tests never complete
+
+*Solution:*
+* Check for infinite loops
+* Verify async operations complete
+* Add timeouts to async operations
+
+=== Flaky Tests
+
+*Problem:* Tests pass sometimes, fail sometimes
+
+*Solution:*
+* Remove dependencies on timing
+* Mock time-dependent operations
+* Fix race conditions
+* Use deterministic test data
+
+=== Import Errors
+
+*Problem:* Cannot import modules
+
+*Solution:*
+[source,bash]
+----
+# Install in editable mode
+pip install -e ".[dev]"
+
+# Verify PYTHONPATH
+echo $PYTHONPATH
+----
+
+=== Fixture Errors
+
+*Problem:* Fixture not found
+
+*Solution:*
+* Check fixture is in conftest.py
+* Verify fixture name spelling
+* Check fixture scope
+
+== Best Practices
+
+=== General
+
+* Write tests first (TDD when possible)
+* Keep tests simple and readable
+* One assertion per test (when reasonable)
+* Use descriptive test names
+* Test edge cases
+* Test error conditions
+* Keep tests independent
+* Avoid test interdependencies
+
+=== Test Organization
+
+* Group related tests in classes
+* Use fixtures for common setup
+* Keep test files focused
+* Mirror source code structure
+
+=### Test Data
+
+* Use realistic test data
+* Create reusable fixtures
+* Avoid hardcoded values
+* Document test data format
+
+=== Coverage
+
+* Aim for high coverage
+* Don't chase 100% unnecessarily
+* Focus on critical paths
+* Test error handling
+
+== Next Steps
+
+* Review link:BUILD.adoc[Build Documentation]
+* Check link:DEVELOPMENT_SETUP.adoc[Development Setup]
+* Read link:../CONTRIBUTING.adoc[Contributing Guidelines]
+
+== Additional Resources
+
+* https://docs.pytest.org/[Pytest Documentation]
+* https://docs.python.org/3/library/unittest.mock.html[Python Mock Documentation]
+* https://www.home-assistant.io/developers/development_testing/[HA Testing Guide]

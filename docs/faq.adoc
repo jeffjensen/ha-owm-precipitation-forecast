@@ -1,0 +1,422 @@
+= Frequently Asked Questions
+:toc:
+:toclevels: 2
+:icons: font
+
+Common questions and answers about OWM Precipitation Forecast.
+
+== General Questions
+
+=== What does this integration do?
+
+This integration provides detailed precipitation forecasts (rain and snow) for your locations using OpenWeatherMap data. It calculates temperature-adjusted snow accumulation and provides hourly, daily, and 24-hour forecasts.
+
+=== Why use this instead of the built-in OpenWeatherMap integration?
+
+While Home Assistant's built-in weather integrations are excellent, this integration specializes in precipitation forecasting with:
+
+* Temperature-adjusted snow calculations (realistic snow-to-liquid ratios)
+* Separate rain and snow tracking
+* Rich hourly/daily breakdowns for charts
+* Multiple time periods (hourly, daily, 24h)
+* Configurable snow ratios for your region
+
+=== Does this work with the free OpenWeatherMap tier?
+
+Yes! The free tier provides 1,000 API calls per day, which is more than sufficient. With default 1-hour polling, you'll only use 24 calls per day (2.4% of your daily limit).
+
+=== What's the difference between hourly, daily, and 24-hour sensors?
+
+* **Hourly**: Precipitation expected in the next hour (updates hourly)
+* **Daily**: Total precipitation forecast for today (resets daily)
+* **24-hour**: Rolling 24-hour total from current time (continuous)
+
+== Setup and Configuration
+
+=== How do I get an OpenWeatherMap API key?
+
+. Visit https://openweathermap.org/api
+. Create a free account
+. Subscribe to "One Call API 3.0" (free tier: 1,000 calls/day)
+. Copy your API key from your account dashboard
+. Add it during integration setup in Home Assistant
+
+NOTE: It may take a few hours for new API keys to become active.
+
+=== Can I track multiple locations?
+
+Yes! Add the integration multiple times with different locations. Each location:
+
+* Has its own configuration
+* Has independent sensors
+* Uses its own API calls
+* Can have different settings (polling interval, snow ratios)
+
+=== How do I change my polling interval?
+
+. Go to **Settings** → **Devices & Services**
+. Find "OWM Precipitation Forecast"
+. Click **Configure**
+. Select your preferred polling interval
+. Click **Submit**
+
+The integration will automatically reload with the new interval.
+
+=== What if my API key stops working?
+
+Check:
+
+. API key is correct (copy-paste from OpenWeatherMap)
+. Your OpenWeatherMap account is active
+. One Call API 3.0 subscription is active
+. Haven't exceeded 1,000 calls per day
+. API key has had time to activate (up to 2 hours for new keys)
+
+== Snow Calculations
+
+=== How does temperature-adjusted snow work?
+
+Snow-to-liquid ratios vary with temperature:
+
+* **Warmer** (32°F+): Wet, heavy snow → 10:1 ratio
+* **Cold** (20°F): Light snow → 20:1 ratio
+* **Very Cold** (0°F): Fluffy powder → 40:1 ratio
+* **Extreme Cold** (-10°F): Very light powder → 50:1 ratio
+
+The integration automatically applies the appropriate ratio based on forecast temperature.
+
+=== Can I customize the snow ratios?
+
+Yes! If your region has different typical ratios:
+
+. Go to integration options
+. Click "Configure Snow Ratios"
+. Adjust ratios for each temperature range (5.0 to 100.0)
+. Save changes
+
+=== Why do snow amounts seem high/low?
+
+Snow ratios are estimates based on typical atmospheric conditions. Actual accumulation can vary due to:
+
+* Wind (drifting)
+* Local geography
+* Specific atmospheric conditions
+* Surface temperature
+* Mixing with rain
+
+Consider these estimates as guides, not exact predictions.
+
+=== What happens with mixed precipitation?
+
+When temperatures hover around freezing:
+
+* The integration uses the forecast temperature for each hour
+* Rain above 32°F
+* Snow below 32°F
+* Ratios adjust as temperatures change
+* You'll see both rain and snow accumulations
+
+== Data and Accuracy
+
+=== How accurate are the forecasts?
+
+Forecast accuracy depends on OpenWeatherMap's models:
+
+* **Next hour**: Very reliable
+* **Today**: Quite accurate
+* **Next 24 hours**: Good accuracy
+* **7-8 days**: Less accurate (longer range)
+
+Use official weather services for critical decisions.
+
+=== Why do my forecasts differ from other weather sources?
+
+Different sources use different:
+
+* Weather models
+* Update frequencies
+* Data sources
+* Calculation methods
+* Rounding approaches
+
+Small differences are normal. Focus on trends rather than exact numbers.
+
+=== How often does the data update?
+
+Data updates based on your configured polling interval (default: 1 hour). OpenWeatherMap updates their forecasts every hour.
+
+=== Can I see historical precipitation data?
+
+No, this integration focuses on forecasts only. For historical tracking, consider using Home Assistant's recorder and history features with these sensors.
+
+== API Usage
+
+=== How many API calls am I using?
+
+Check the health sensor attributes:
+
+* `api_calls_today`: Calls made today
+* `api_calls_remaining`: Calls left today
+
+Or view in Developer Tools → States → `sensor.owm_precipitation_forecast_[location]_health`
+
+=== What happens if I hit the rate limit?
+
+At 80% (800 calls):
+* Integration shows warning status
+* Continues operating with caution
+
+At 100% (1,000 calls):
+* Integration throttles requests
+* Updates pause until daily reset
+* Health sensor shows error
+
+Daily limit resets at midnight UTC.
+
+=== How can I reduce API usage?
+
+. Increase polling interval (4 hours instead of 1 hour)
+. Remove unused locations
+. Disable rain or snow tracking if not needed
+
+With 4-hour polling:
+* 6 calls per day per location
+* Supports ~160 locations within free tier
+
+=== Can I use multiple API keys?
+
+Each location uses the API key configured for it. To use multiple keys:
+
+. Add first location with API key #1
+. Add second location with API key #2
+. Each will use its own key independently
+
+== Troubleshooting
+
+=== My sensors show "unavailable"
+
+**Check:**
+
+. Health sensor for error messages
+. Home Assistant logs
+. Internet connection
+. OpenWeatherMap API status
+. API key validity
+
+**Try:**
+
+. Calling `owm_precipitation_forecast.update_forecast` service
+. Calling `owm_precipitation_forecast.clear_errors` service
+. Restarting Home Assistant
+. Recreating the integration
+
+=== All values show 0.0
+
+This is normal if no precipitation is forecast! Check:
+
+. Other weather sources to confirm
+. Try a different location with known precipitation
+. Verify data is updating (check last_update attribute)
+
+=== Integration won't install
+
+**Verify:**
+
+. Home Assistant version 2024.1.0 or newer
+. HACS is installed and updated
+. Integration files in correct folder
+. Restart after installation
+
+=== Sensors don't appear in dashboard
+
+. Check entity IDs in Developer Tools → States
+. Filter by "owm_precipitation"
+. Verify integration is loaded (not showing errors)
+. Check rain/snow are enabled in options
+
+=== Wrong location coordinates
+
+. Go to integration options
+. Note: Can't change coordinates directly
+. Must remove and re-add integration with correct coordinates
+. Or add as new location and remove old one
+
+== Dashboard and Automation
+
+=== How do I create charts?
+
+See link:USAGE_EXAMPLES.adoc[Usage Examples] for ApexCharts configurations. The sensors provide `hourly_breakdown` and `daily_breakdown` attributes specifically for charting.
+
+=== Can I use this in Lovelace?
+
+Yes! Works with all Lovelace cards:
+
+* Entities card
+* Glance card
+* Gauge card
+* Markdown card
+* Conditional card
+* Custom cards (ApexCharts, mini-graph, etc.)
+
+=== How do I trigger automations?
+
+Use numeric_state triggers:
+
+[source,yaml]
+----
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.owm_precipitation_forecast_home_next24h_rain
+    above: 1.0
+----
+
+See link:USAGE_EXAMPLES.adoc[Usage Examples] for complete automation examples.
+
+=== Can I use templates with these sensors?
+
+Yes! Access states and attributes in templates:
+
+[source,yaml]
+----
+{{ states('sensor.owm_precipitation_forecast_home_hourly_rain') }}
+{{ state_attr('sensor.owm_precipitation_forecast_home_health', 'api_calls_remaining') }}
+----
+
+== Advanced Topics
+
+=== Can I access the raw OWM data?
+
+The integration processes OWM data into user-friendly sensors. For raw data, you'd need to call the OWM API directly or use their integration.
+
+=== Does this work offline?
+
+No, requires internet connection for API calls. Cached data from last successful update remains available during outages.
+
+=== Can I contribute to development?
+
+Yes! See link:../CONTRIBUTING.adoc[Contributing Guide] for:
+
+* Reporting bugs
+* Suggesting features
+* Submitting pull requests
+* Development setup
+
+=== Where are the logs?
+
+In Home Assistant logs, filter by:
+
+* `custom_components.owm_precipitation_forecast`
+* Component name in logs
+
+Access via: Settings → System → Logs
+
+=== Can I back up my configuration?
+
+Your configuration is stored in:
+
+* Config entries (backed up with HA backups)
+* Options (backed up with HA backups)
+
+Regular HA backups include this integration's configuration.
+
+== Performance
+
+=== Does this slow down Home Assistant?
+
+No. The integration:
+
+* Uses async operations (non-blocking)
+* Updates independently per location
+* Minimal resource usage
+* Lightweight calculations
+
+=== How much memory does it use?
+
+Very little:
+
+* ~1MB per location
+* Includes all forecast data
+* 48 hours × 7 days of forecasts
+* No significant impact on HA performance
+
+=== Can I have 10+ locations?
+
+Yes, but consider:
+
+* API usage (24 calls/day per location with 1hr polling)
+* Each location is independent
+* No performance issues with multiple locations
+* Stay within 1,000 daily API calls
+
+== Support and Help
+
+=== Where do I report bugs?
+
+. https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/issues[GitHub Issues]
+. Provide:
+   * Home Assistant version
+   * Integration version
+   * Error logs
+   * Steps to reproduce
+
+=== How do I request features?
+
+. Check existing https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/issues[GitHub Issues]
+. Open new issue with "Feature Request" label
+. Describe use case and benefits
+
+=== Where can I get help?
+
+* https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/discussions[GitHub Discussions]
+* Home Assistant Community Forum
+* Integration documentation
+
+=== Is there a Discord/Slack?
+
+Not currently. Use GitHub Discussions for community support.
+
+== Comparison
+
+=== vs. Built-in OpenWeatherMap Integration
+
+|===
+|Feature |This Integration |Built-in Integration
+
+|Temperature-adjusted snow
+|✅ Yes
+|❌ No
+
+|Separate rain/snow sensors
+|✅ Yes
+|❌ No
+
+|Hourly breakdowns for charts
+|✅ Yes
+|❌ No
+
+|Multiple time periods
+|✅ Yes (hourly, daily, 24h)
+|❌ Limited
+
+|Configurable snow ratios
+|✅ Yes
+|❌ No
+
+|Health monitoring
+|✅ Yes
+|❌ No
+
+|General weather data
+|❌ No (precipitation only)
+|✅ Yes
+|===
+
+=== vs. Other Weather Integrations
+
+This integration specializes in precipitation forecasting. For complete weather data (temperature, pressure, wind, etc.), use alongside other weather integrations.
+
+---
+
+*Still have questions?* Ask in https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/discussions[GitHub Discussions]!
+
+*Last Updated: January 2024*

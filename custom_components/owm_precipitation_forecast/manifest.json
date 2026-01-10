@@ -1,0 +1,21 @@
+{
+  "domain": "owm_precipitation_forecast",
+  "name": "OWM Precipitation Forecast",
+  "version": "1.0.0",
+  "documentation": "https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/blob/main/README.adoc",
+  "issue_tracker": "https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/issues",
+  "requirements": [
+    "aiohttp>=3.9.0"
+  ],
+  "codeowners": [
+    "@jeffjensen"
+  ],
+  "config_flow": true,
+  "iot_class": "cloud_polling",
+  "integration_type": "service",
+  "after_dependencies": [],
+  "dependencies": [],
+  "loggers": [
+    "custom_components.owm_precipitation_forecast"
+  ]
+}

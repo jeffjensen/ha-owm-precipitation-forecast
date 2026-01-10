@@ -1,0 +1,263 @@
+# Release Checklist
+
+Use this checklist before releasing a new version.
+
+## Pre-Release Validation
+
+### Code Quality
+
+- [ ] All tests pass: `pytest tests --cov`
+- [ ] Coverage ≥ 95%: Check `htmlcov/index.html`
+- [ ] No linting errors: `python scripts/build.py --lint`
+- [ ] Type checking passes: `python scripts/build.py --type-check`
+- [ ] Security scan clean: `python scripts/build.py --security`
+- [ ] Code formatted: `python scripts/build.py --format`
+- [ ] Manifest validates: `python scripts/validate_manifest.py`
+
+### Documentation
+
+- [ ] README.adoc updated with new features
+- [ ] CHANGELOG.md updated with version changes
+- [ ] All docs/ files current
+- [ ] Code docstrings complete
+- [ ] Examples tested and working
+
+### Version Numbers
+
+- [ ] Update `manifest.json` version
+- [ ] Update `pyproject.toml` version
+- [ ] Update `const.py` VERSION constant (if present)
+- [ ] Version follows semver (MAJOR.MINOR.PATCH)
+
+### HACS Compliance
+
+- [ ] `manifest.json` has all required fields
+- [ ] `hacs.json` present and valid
+- [ ] README.md exists (links to README.adoc)
+- [ ] No relative links in documentation
+- [ ] Repository is public
+- [ ] Repository has releases
+
+### Home Assistant Compliance
+
+- [ ] Works with HA 2024.1.0+
+- [ ] Config flow works
+- [ ] Options flow works
+- [ ] All sensors functioning
+- [ ] Services working
+- [ ] Events firing correctly
+- [ ] No deprecated HA features used
+
+### Functionality Testing
+
+#### Installation
+- [ ] Fresh install works via HACS
+- [ ] Manual install works
+- [ ] Integration appears in UI
+- [ ] Config flow completes successfully
+
+#### Configuration
+- [ ] Can add location
+- [ ] API key validation works
+- [ ] Invalid coordinates rejected
+- [ ] Duplicate locations prevented
+- [ ] Options can be modified
+
+#### Sensors
+- [ ] All 7 sensors created
+- [ ] Sensors show real values (not 0.0)
+- [ ] Attributes populated correctly
+- [ ] Health sensor accurate
+- [ ] Icons display properly
+- [ ] Units correct (inches)
+
+#### Services
+- [ ] `update_forecast` works
+- [ ] `clear_errors` works
+- [ ] Services visible in Developer Tools
+
+#### Error Handling
+- [ ] Invalid API key shows error
+- [ ] Network errors handled gracefully
+- [ ] Timeout errors retry correctly
+- [ ] Rate limiting warning works
+- [ ] Health sensor reflects status
+
+#### Data Accuracy
+- [ ] Temperature-adjusted snow calculations correct
+- [ ] Hourly rain values reasonable
+- [ ] Daily totals match hourly sums
+- [ ] Next 24h calculations accurate
+- [ ] Precipitation descriptions appropriate
+
+### Dashboard Testing
+
+- [ ] Entities card works
+- [ ] Glance card works
+- [ ] Chart card (if using ApexCharts) works
+- [ ] Markdown card templates work
+- [ ] Manual refresh button works
+
+### Automation Testing
+
+- [ ] Numeric state triggers work
+- [ ] State change triggers work
+- [ ] Service calls in automations work
+- [ ] Template sensors can use data
+- [ ] Events can trigger automations
+
+### Multiple Location Testing
+
+- [ ] Can add multiple locations
+- [ ] Each location independent
+- [ ] Each location has unique entities
+- [ ] All locations update correctly
+
+### Performance
+
+- [ ] Updates complete in <5 seconds
+- [ ] No blocking operations
+- [ ] Memory usage reasonable
+- [ ] CPU usage minimal
+- [ ] No performance degradation over time
+
+### Logs
+
+- [ ] No errors in logs during normal operation
+- [ ] Debug logs helpful and clear
+- [ ] Warning logs appropriate
+- [ ] Error logs actionable
+
+## CI/CD
+
+### GitHub Actions
+
+- [ ] CI workflow passes
+- [ ] All jobs successful (lint, test, validate, build, docs)
+- [ ] No workflow warnings
+
+### Release Process
+
+- [ ] Create release branch: `release/vX.Y.Z`
+- [ ] Update version numbers
+- [ ] Update CHANGELOG.md
+- [ ] Commit: "Release vX.Y.Z"
+- [ ] Push branch
+- [ ] Create PR to main
+- [ ] Wait for CI to pass
+- [ ] Merge PR
+- [ ] Create Git tag: `git tag vX.Y.Z`
+- [ ] Push tag: `git push origin vX.Y.Z`
+- [ ] Verify GitHub Release created automatically
+- [ ] Verify release artifacts present
+
+## Post-Release
+
+### Verification
+
+- [ ] Release appears on GitHub
+- [ ] HACS can see new version
+- [ ] Can install via HACS
+- [ ] Fresh install works
+- [ ] Upgrade from previous version works
+
+### Communication
+
+- [ ] Update Home Assistant Community forum post
+- [ ] Respond to any open issues
+- [ ] Update project status
+
+### Monitoring
+
+- [ ] Watch for bug reports
+- [ ] Monitor community feedback
+- [ ] Track download statistics
+
+## Version-Specific Checks
+
+### Major Version (X.0.0)
+
+- [ ] Breaking changes documented clearly
+- [ ] Migration guide provided
+- [ ] Deprecation warnings added first
+- [ ] Wait period for deprecations respected
+
+### Minor Version (x.Y.0)
+
+- [ ] New features documented
+- [ ] Backward compatible
+- [ ] Examples provided
+- [ ] No breaking changes
+
+### Patch Version (x.y.Z)
+
+- [ ] Bug fixes only
+- [ ] No new features
+- [ ] No breaking changes
+- [ ] Critical fixes prioritized
+
+## HACS Submission (First Release Only)
+
+- [ ] Repository public
+- [ ] README.md and README.adoc present
+- [ ] hacs.json valid
+- [ ] manifest.json valid
+- [ ] At least one release
+- [ ] Code follows HA guidelines
+- [ ] Submit to HACS default repository
+- [ ] Wait for HACS team review
+- [ ] Address any feedback
+- [ ] Celebrate acceptance! 🎉
+
+## Rollback Plan
+
+If issues discovered after release:
+
+1. Document the issue
+2. Create hotfix branch
+3. Fix the issue
+4. Test thoroughly
+5. Release patch version
+6. Or revert to previous version if critical
+
+## Sign-Off
+
+**Version:** _________________
+
+**Date:** _________________
+
+**Released by:** _________________
+
+**Verified by:** _________________
+
+**Notes:**
+
+_________________________________________________
+
+_________________________________________________
+
+_________________________________________________
+
+## Quick Command Reference
+
+```bash
+# Run all quality checks
+python scripts/build.py --all
+
+# Run tests with coverage
+pytest tests --cov --cov-report=html
+
+# Validate manifest
+python scripts/validate_manifest.py
+
+# Create release
+git tag vX.Y.Z
+git push origin vX.Y.Z
+
+# Check CI status
+# Visit: https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/actions
+```
+
+---
+
+**Remember:** Take your time. Quality over speed. Users depend on reliability.

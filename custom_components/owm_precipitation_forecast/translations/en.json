@@ -1,0 +1,151 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure OWM Precipitation Forecast",
+        "description": "Set up your OpenWeatherMap precipitation forecast. Get a free API key at https://openweathermap.org/api",
+        "data": {
+          "api_key": "OpenWeatherMap API Key",
+          "location_name": "Location Name",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "polling_interval_option": "Update Interval"
+        },
+        "data_description": {
+          "api_key": "Your OpenWeatherMap One Call API 3.0 key",
+          "location_name": "A friendly name for this location",
+          "latitude": "Latitude of the forecast location",
+          "longitude": "Longitude of the forecast location",
+          "enable_rain": "Track rain accumulation",
+          "enable_snow": "Track snow accumulation",
+          "polling_interval_option": "How often to fetch new forecast data"
+        }
+      }
+    },
+    "error": {
+      "api_key_invalid": "Invalid API key. Please check your OpenWeatherMap API key and ensure you have access to the One Call API 3.0.",
+      "api_connection": "Unable to connect to OpenWeatherMap. Please check your internet connection and try again.",
+      "location_invalid": "Invalid coordinates. Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "unknown": "An unexpected error occurred. Please check the logs for more details and try again."
+    },
+    "abort": {
+      "already_configured": "This location is already configured. Please use a different location or update the existing configuration."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Precipitation Forecast Options",
+        "description": "Adjust your precipitation forecast settings. Changes will take effect after the next update.",
+        "data": {
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "polling_interval_option": "Update Interval"
+        },
+        "data_description": {
+          "enable_rain": "Track and display rain accumulation forecasts",
+          "enable_snow": "Track and display snow accumulation forecasts",
+          "polling_interval_option": "How frequently to fetch new forecast data from OpenWeatherMap"
+        }
+      },
+      "snow_ratios": {
+        "title": "Temperature-Adjusted Snow Ratios",
+        "description": "Configure how liquid precipitation converts to snow at different temperatures. Higher ratios produce more snow from the same liquid amount. Default ratios are based on typical atmospheric conditions.",
+        "data": {
+          "ratio_32": "32°F and above (wet, heavy snow)",
+          "ratio_28": "28-31°F (wet snow)",
+          "ratio_24": "24-27°F (average snow)",
+          "ratio_20": "20-23°F (light snow)",
+          "ratio_15": "15-19°F (lighter snow)",
+          "ratio_10": "10-14°F (fluffy snow)",
+          "ratio_0": "0-9°F (very light snow)",
+          "ratio_minus_10": "Below 0°F (powder)"
+        },
+        "data_description": {
+          "ratio_32": "Liquid to snow ratio at 32°F and warmer (typically 10:1)",
+          "ratio_28": "Liquid to snow ratio between 28-31°F (typically 12:1)",
+          "ratio_24": "Liquid to snow ratio between 24-27°F (typically 15:1)",
+          "ratio_20": "Liquid to snow ratio between 20-23°F (typically 20:1)",
+          "ratio_15": "Liquid to snow ratio between 15-19°F (typically 25:1)",
+          "ratio_10": "Liquid to snow ratio between 10-14°F (typically 30:1)",
+          "ratio_0": "Liquid to snow ratio between 0-9°F (typically 40:1)",
+          "ratio_minus_10": "Liquid to snow ratio below 0°F (typically 50:1)"
+        }
+      }
+    }
+  },
+  "selector": {
+    "polling_interval": {
+      "options": {
+        "15_minutes": "Every 15 Minutes",
+        "30_minutes": "Every 30 Minutes",
+        "1_hour": "Every Hour (Recommended)",
+        "4_hours": "Every 4 Hours",
+        "8_hours": "Every 8 Hours",
+        "12_hours": "Every 12 Hours",
+        "24_hours": "Once Daily"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "hourly_rain": {
+        "name": "{location_name} Hourly Rain",
+        "state": {
+          "0": "No rain expected"
+        }
+      },
+      "hourly_snow": {
+        "name": "{location_name} Hourly Snow",
+        "state": {
+          "0": "No snow expected"
+        }
+      },
+      "daily_rain": {
+        "name": "{location_name} Daily Rain",
+        "state": {
+          "0": "No rain expected"
+        }
+      },
+      "daily_snow": {
+        "name": "{location_name} Daily Snow",
+        "state": {
+          "0": "No snow expected"
+        }
+      },
+      "next24h_rain": {
+        "name": "{location_name} Next 24h Rain",
+        "state": {
+          "0": "No rain expected"
+        }
+      },
+      "next24h_snow": {
+        "name": "{location_name} Next 24h Snow",
+        "state": {
+          "0": "No snow expected"
+        }
+      },
+      "health": {
+        "name": "{location_name} Integration Health",
+        "state": {
+          "ok": "Operating normally",
+          "warning": "Minor issues detected",
+          "error": "Errors present",
+          "unavailable": "Unavailable"
+        }
+      }
+    }
+  },
+  "services": {
+    "update_forecast": {
+      "name": "Update Forecast",
+      "description": "Manually trigger a forecast update for all configured locations."
+    },
+    "clear_errors": {
+      "name": "Clear Errors",
+      "description": "Clear error counters and reset health status."
+    }
+  }
+}

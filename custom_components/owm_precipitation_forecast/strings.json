@@ -1,0 +1,117 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure OWM Precipitation Forecast",
+        "description": "Set up your OpenWeatherMap precipitation forecast. Get a free API key at https://openweathermap.org/api",
+        "data": {
+          "api_key": "OpenWeatherMap API Key",
+          "location_name": "Location Name",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "polling_interval_option": "Update Interval"
+        }
+      }
+    },
+    "error": {
+      "api_key_invalid": "Invalid API key. Please check your OpenWeatherMap API key.",
+      "api_connection": "Unable to connect to OpenWeatherMap. Please check your internet connection.",
+      "location_invalid": "Invalid coordinates. Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "unknown": "An unexpected error occurred. Please try again."
+    },
+    "abort": {
+      "already_configured": "This location is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Options",
+        "description": "Adjust your precipitation forecast settings",
+        "data": {
+          "enable_rain": "Enable Rain Tracking",
+          "enable_snow": "Enable Snow Tracking",
+          "polling_interval_option": "Update Interval"
+        }
+      },
+      "snow_ratios": {
+        "title": "Temperature-Adjusted Snow Ratios",
+        "description": "Configure liquid-to-snow conversion ratios for different temperatures",
+        "data": {
+          "ratio_32": "32°F and above (wet snow)",
+          "ratio_28": "28-31°F",
+          "ratio_24": "24-27°F",
+          "ratio_20": "20-23°F",
+          "ratio_15": "15-19°F",
+          "ratio_10": "10-14°F",
+          "ratio_0": "0-9°F",
+          "ratio_minus_10": "Below 0°F (powder)"
+        }
+      }
+    }
+  },
+  "selector": {
+    "polling_interval": {
+      "options": {
+        "15_minutes": "15 Minutes",
+        "30_minutes": "30 Minutes",
+        "1_hour": "1 Hour",
+        "4_hours": "4 Hours",
+        "8_hours": "8 Hours",
+        "12_hours": "12 Hours",
+        "24_hours": "24 Hours"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "hourly_rain": {
+        "name": "Hourly Rain",
+        "state": {
+          "0": "No rain"
+        }
+      },
+      "hourly_snow": {
+        "name": "Hourly Snow",
+        "state": {
+          "0": "No snow"
+        }
+      },
+      "daily_rain": {
+        "name": "Daily Rain",
+        "state": {
+          "0": "No rain"
+        }
+      },
+      "daily_snow": {
+        "name": "Daily Snow",
+        "state": {
+          "0": "No snow"
+        }
+      },
+      "next24h_rain": {
+        "name": "Next 24h Rain",
+        "state": {
+          "0": "No rain"
+        }
+      },
+      "next24h_snow": {
+        "name": "Next 24h Snow",
+        "state": {
+          "0": "No snow"
+        }
+      },
+      "health": {
+        "name": "Integration Health",
+        "state": {
+          "ok": "OK",
+          "warning": "Warning",
+          "error": "Error",
+          "unavailable": "Unavailable"
+        }
+      }
+    }
+  }
+}

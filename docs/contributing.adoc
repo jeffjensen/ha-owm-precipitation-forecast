@@ -1,0 +1,392 @@
+= Contributing to OWM Precipitation Forecast
+:toc:
+:toclevels: 2
+:icons: font
+
+Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
+
+== Code of Conduct
+
+* Be respectful and inclusive
+* Focus on constructive feedback
+* Help others learn and grow
+* Assume good intentions
+
+== Getting Started
+
+=== Prerequisites
+
+* Python 3.11 or 3.12
+* Git
+* VS Code (recommended)
+* Home Assistant development environment
+
+=== Development Setup
+
+See link:docs/DEVELOPMENT_SETUP.adoc[Development Setup Guide] for detailed instructions.
+
+Quick start:
+
+[source,bash]
+----
+git clone https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration.git
+cd ha-owm-precipitation-forecast-integration
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+----
+
+== How to Contribute
+
+=== Reporting Bugs
+
+. Check existing issues first
+. Use the bug report template
+. Include:
+   * Home Assistant version
+   * Integration version
+   * Steps to reproduce
+   * Expected vs actual behavior
+   * Error messages and logs
+   * Health sensor attributes
+
+=== Suggesting Features
+
+. Check existing issues and discussions
+. Use the feature request template
+. Explain:
+   * Use case and benefits
+   * Proposed solution
+   * Alternatives considered
+   * Implementation ideas (if any)
+
+=== Submitting Pull Requests
+
+==== Before You Start
+
+. Open an issue to discuss changes
+. Get feedback on approach
+. Ensure no duplicate work
+
+==== PR Process
+
+. Fork the repository
+. Create a feature branch:
++
+[source,bash]
+----
+git checkout -b feature/your-feature-name
+----
+
+. Make your changes
+. Follow code style guidelines
+. Write tests for new code
+. Update documentation
+. Run quality checks:
++
+[source,bash]
+----
+python scripts/build.py --all
+----
+
+. Commit with clear messages:
++
+[source,bash]
+----
+git commit -m "Add feature: description"
+----
+
+. Push to your fork:
++
+[source,bash]
+----
+git push origin feature/your-feature-name
+----
+
+. Open a pull request
+
+==== PR Requirements
+
+* All tests pass
+* Code coverage maintained (95%+)
+* Documentation updated
+* Changelog entry added
+* Code follows style guide
+* No linting errors
+* Type hints included
+
+== Code Style
+
+=== Python Style
+
+* Follow PEP 8
+* Use Black for formatting (100 char line length)
+* Use isort for imports
+* Type hints for all functions
+* Docstrings for public APIs
+
+*Example:*
+
+[source,python]
+----
+def calculate_snow(liquid: float, temp: float) -> float:
+    """
+    Calculate snow from liquid precipitation.
+
+    Args:
+        liquid: Liquid precipitation in inches
+        temp: Temperature in Fahrenheit
+
+    Returns:
+        Snow accumulation in inches
+    """
+    ratio = get_ratio_for_temp(temp)
+    return round(liquid * ratio, 2)
+----
+
+=== Naming Conventions
+
+* *Constants:* `UPPER_SNAKE_CASE`
+* *Functions:* `lower_snake_case`
+* *Classes:* `PascalCase`
+* *Private:* `_leading_underscore`
+
+=== File Organization
+
+* Keep files focused and modular
+* Separate concerns (API, data processing, UI)
+* Use helpers for reusable code
+* Keep constants in `const.py`
+
+== Testing
+
+=== Writing Tests
+
+* Test all new functionality
+* Include edge cases
+* Test error conditions
+* Use appropriate markers:
+   ** `@pytest.mark.unit` - Unit tests
+   ** `@pytest.mark.integration` - Integration tests
+   ** `@pytest.mark.advanced` - Complex scenarios
+
+*Example:*
+
+[source,python]
+----
+@pytest.mark.unit
+def test_snow_calculation():
+    """Test snow calculation at 32°F."""
+    result = calculate_snow(1.0, 32.0)
+    assert result == 10.0
+----
+
+=== Running Tests
+
+[source,bash]
+----
+# All tests
+pytest tests --cov
+
+# Specific category
+pytest tests -m unit -v
+
+# With coverage report
+pytest tests --cov --cov-report=html
+----
+
+=== Coverage Requirements
+
+* Overall: 95%+
+* New code: 100%
+* Critical paths: 100%
+
+== Documentation
+
+=== When to Update
+
+* New features
+* Changed behavior
+* New configuration options
+* Bug fixes affecting usage
+
+=== Documentation Files
+
+* `README.adoc` - Main documentation
+* `docs/*.adoc` - Detailed guides
+* Code docstrings
+* Inline comments for complex logic
+* `CHANGELOG.md` - Version history
+
+=== Writing Style
+
+* Clear and concise
+* Use examples
+* Include use cases
+* Assume beginner-friendly
+* Use AsciiDoc format
+
+== Commit Messages
+
+=== Format
+
+----
+type: Short description
+
+Longer explanation if needed.
+
+Fixes #123
+----
+
+=== Types
+
+* `feat:` - New feature
+* `fix:` - Bug fix
+* `docs:` - Documentation only
+* `style:` - Code style changes
+* `refactor:` - Code restructuring
+* `test:` - Adding tests
+* `chore:` - Maintenance
+
+=== Examples
+
+----
+feat: Add hourly breakdown for charts
+
+Add hourly_breakdown attribute to sensors containing
+24 hours of detailed precipitation data for use in
+chart cards.
+
+Closes #45
+----
+
+----
+fix: Correct snow calculation at freezing point
+
+Fix temperature threshold check for rain-to-snow
+conversion at exactly 32°F.
+
+Fixes #67
+----
+
+== Review Process
+
+=== PR Review
+
+. Automated checks run (CI)
+. Code review by maintainer
+. Discussion and changes
+. Approval and merge
+
+=== What Reviewers Look For
+
+* Code quality
+* Test coverage
+* Documentation completeness
+* Backward compatibility
+* Performance impact
+* Security considerations
+
+== Release Process
+
+=== Versioning
+
+We use Semantic Versioning (semver):
+
+* `MAJOR.MINOR.PATCH`
+* MAJOR: Breaking changes
+* MINOR: New features (backward compatible)
+* PATCH: Bug fixes
+
+=== Release Steps
+
+. Update version in:
+   ** `manifest.json`
+   ** `pyproject.toml`
+. Update `CHANGELOG.md`
+. Commit changes
+. Create tag: `git tag v1.0.0`
+. Push tag: `git push origin v1.0.0`
+. GitHub Actions creates release
+
+== Development Tools
+
+=== Required Tools
+
+* Black - Code formatting
+* isort - Import sorting
+* Ruff - Fast linting
+* Pylint - Comprehensive linting
+* MyPy - Type checking
+* Bandit - Security scanning
+* pytest - Testing framework
+
+=== VS Code Setup
+
+The repository includes VS Code configuration:
+
+* Format on save enabled
+* Linters configured
+* Test discovery set up
+* Debug configurations included
+
+Install recommended extensions when prompted.
+
+=== Quality Checks
+
+Run before committing:
+
+[source,bash]
+----
+python scripts/build.py --all
+----
+
+This runs:
+
+* Code formatting
+* Linting
+* Type checking
+* Security scanning
+* All tests
+* Manifest validation
+* Package building
+
+== Areas for Contribution
+
+=== Good First Issues
+
+Look for issues labeled `good first issue`:
+
+* Documentation improvements
+* Test coverage
+* Bug fixes
+* Code comments
+
+=== High Impact Areas
+
+* Additional weather data integration
+* Performance optimizations
+* More language translations
+* Advanced visualization features
+* Enhanced error handling
+
+=== Feature Ideas
+
+* Historical data tracking
+* Weather alerts integration
+* Precipitation radar
+* Long-range forecasts
+* Additional weather providers
+
+== Questions?
+
+* Open a https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/discussions[Discussion]
+* Ask in existing issues
+
+== Thank You!
+
+Your contributions make this project better for everyone!
+
+---
+
+Last updated: January 2024

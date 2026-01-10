@@ -1,0 +1,384 @@
+= Development Environment Setup
+:toc:
+:toclevels: 3
+:icons: font
+
+== Prerequisites
+
+Before setting up the development environment, ensure you have the following installed:
+
+=== Required Software
+
+* *Python 3.11 or 3.12* - The integration requires Python 3.11+
+* *Git* - For version control
+* *pip* - Python package manager (usually comes with Python)
+* *VS Code* (recommended) - Or your preferred IDE
+
+=== Recommended Tools
+
+* *GitHub CLI* - For easier GitHub integration
+* *Docker* (optional) - For running Home Assistant in a container during testing
+
+== Initial Setup
+
+=== 1. Clone the Repository
+
+[source,bash]
+----
+git clone https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration.git
+cd ha-owm-precipitation-forecast-integration
+----
+
+=== 2. Create a Virtual Environment
+
+It's highly recommended to use a virtual environment to isolate project dependencies.
+
+[source,bash]
+----
+# Create virtual environment
+python3.11 -m venv .venv
+
+# Activate virtual environment
+# On Linux/macOS:
+source .venv/bin/activate
+
+# On Windows:
+.venv\Scripts\activate
+----
+
+TIP: Always activate the virtual environment before working on the project.
+
+=== 3. Install Dependencies
+
+Install all development dependencies:
+
+[source,bash]
+----
+pip install --upgrade pip
+pip install -e ".[dev]"
+----
+
+This installs:
+
+* The integration itself in editable mode
+* All runtime dependencies
+* All development tools (pytest, black, ruff, mypy, etc.)
+
+=== 4. Verify Installation
+
+Verify that all tools are installed correctly:
+
+[source,bash]
+----
+# Check Python version
+python --version
+
+# Check installed packages
+pip list
+
+# Verify tools
+black --version
+pytest --version
+mypy --version
+ruff --version
+----
+
+== VS Code Setup
+
+=== 1. Install VS Code
+
+Download and install VS Code from https://code.visualstudio.com/
+
+=== 2. Install Recommended Extensions
+
+Open the project in VS Code:
+
+[source,bash]
+----
+code .
+----
+
+VS Code will prompt you to install recommended extensions. Click *Install All* or install them manually:
+
+* Python (ms-python.python)
+* Pylance (ms-python.vscode-pylance)
+* Black Formatter (ms-python.black-formatter)
+* isort (ms-python.isort)
+* Ruff (charliermarsh.ruff)
+* MyPy Type Checker (ms-python.mypy-type-checker)
+* YAML (redhat.vscode-yaml)
+* Markdown Lint (DavidAnson.vscode-markdownlint)
+* AsciiDoc (asciidoctor.asciidoctor-vscode)
+* GitLens (eamodio.gitlens)
+
+=== 3. Configure VS Code Settings
+
+The project includes pre-configured settings in `.vscode/settings.json` that:
+
+* Set the Python interpreter to the virtual environment
+* Enable format-on-save for all file types
+* Configure linters to run on save
+* Set up pytest for test discovery
+* Configure rulers at 100 characters
+
+These settings are automatically applied when you open the project.
+
+=== 4. Select Python Interpreter
+
+1. Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS)
+2. Type "Python: Select Interpreter"
+3. Select the interpreter from `.venv/bin/python`
+
+=== 5. Verify VS Code Setup
+
+1. Open any Python file
+2. Make a small edit and save - formatting should apply automatically
+3. Check the problems panel (`Ctrl+Shift+M`) for any linter warnings
+
+== Environment Configuration
+
+=== 1. Create .env File (Optional)
+
+For development with Home Assistant integration testing:
+
+[source,bash]
+----
+cp .env.example .env
+----
+
+Edit `.env` and add your configuration:
+
+[source,env]
+----
+OWM_API_KEY=your_openweathermap_api_key_here
+HA_TEST_URL=http://localhost:8123
+HA_TEST_TOKEN=your_test_token_here
+----
+
+WARNING: Never commit `.env` files to version control. They contain sensitive data.
+
+=== 2. Configure Git
+
+Set up git hooks and ignore patterns (already configured):
+
+[source,bash]
+----
+# Verify .gitignore
+cat .gitignore
+
+# Configure git user if needed
+git config user.name "Your Name"
+git config user.email "your.email@example.com"
+----
+
+== Testing the Setup
+
+=== 1. Run the Build Script
+
+Test that all tools are working:
+
+[source,bash]
+----
+python scripts/build.py --all
+----
+
+This will:
+
+* Format code with Black and isort
+* Run linters (Ruff, Pylint)
+* Run type checking (MyPy)
+* Run security checks (Bandit)
+* Run all tests with coverage
+* Validate the manifest
+* Build the package
+
+=== 2. Run Individual Checks
+
+You can also run checks individually:
+
+[source,bash]
+----
+# Format code
+python scripts/build.py --format
+
+# Lint code
+python scripts/build.py --lint
+
+# Type check
+python scripts/build.py --type-check
+
+# Run tests
+python scripts/build.py --test
+
+# Run specific test markers
+python scripts/build.py --test --test-markers unit
+----
+
+=== 3. Run Tests in VS Code
+
+1. Open the Testing panel (flask icon in left sidebar)
+2. Click the "Refresh Tests" button
+3. Run all tests or individual tests
+4. View test results and coverage
+
+== Workflow
+
+=== Daily Development Workflow
+
+1. *Start work*
++
+[source,bash]
+----
+# Pull latest changes
+git pull
+
+# Activate virtual environment
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+
+# Update dependencies if needed
+pip install -e ".[dev]"
+----
+
+2. *Make changes*
++
+* Edit code in VS Code
+* Formatting applies automatically on save
+* Linters run automatically
+
+3. *Test changes*
++
+[source,bash]
+----
+# Run tests
+python scripts/build.py --test
+
+# Or run specific tests
+pytest tests/test_specific.py -v
+----
+
+4. *Commit changes*
++
+[source,bash]
+----
+# Stage changes
+git add .
+
+# Commit with descriptive message
+git commit -m "Add feature X"
+
+# Push to GitHub
+git push
+----
+
+=== Before Pushing to GitHub
+
+Always run the full build before pushing:
+
+[source,bash]
+----
+python scripts/build.py --all
+----
+
+This ensures:
+
+* Code is properly formatted
+* No linting errors
+* Type checking passes
+* All tests pass
+* Security checks pass
+
+== Troubleshooting
+
+=== Virtual Environment Issues
+
+*Problem:* Virtual environment not activating
+
+*Solution:*
+[source,bash]
+----
+# Delete and recreate
+rm -rf .venv
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+----
+
+=== Import Errors
+
+*Problem:* Modules not found
+
+*Solution:*
+[source,bash]
+----
+# Ensure virtual environment is activated
+which python  # Should show .venv/bin/python
+
+# Reinstall in editable mode
+pip install -e ".[dev]"
+----
+
+=== VS Code Not Using Correct Python
+
+*Problem:* VS Code using system Python instead of .venv
+
+*Solution:*
+
+1. Press `Ctrl+Shift+P`
+2. Type "Python: Select Interpreter"
+3. Choose `.venv/bin/python`
+4. Reload VS Code window
+
+=== Linter Errors
+
+*Problem:* Overwhelming linter errors
+
+*Solution:*
+[source,bash]
+----
+# Format code first
+black .
+isort .
+
+# Then check remaining issues
+ruff check .
+----
+
+=== Test Failures
+
+*Problem:* Tests failing after setup
+
+*Solution:*
+[source,bash]
+----
+# Clear pytest cache
+rm -rf .pytest_cache
+rm -rf .coverage
+rm -rf htmlcov
+
+# Run tests with verbose output
+pytest -v -s
+----
+
+== Next Steps
+
+Once your development environment is set up:
+
+1. Read link:BUILD.adoc[Build Documentation]
+2. Read link:TESTING.adoc[Testing Documentation]
+3. Review the link:../README.adoc[README] for project overview
+4. Check link:../CONTRIBUTING.adoc[Contributing Guidelines]
+
+== Getting Help
+
+If you encounter issues:
+
+* Check the link:../README.adoc[README] documentation
+* Review existing https://github.com/jeffjensen/ha-owm-precipitation-forecast-integration/issues[GitHub Issues]
+* Create a new issue with details about your problem
+
+== Additional Resources
+
+* https://www.home-assistant.io/developers/[Home Assistant Developer Docs]
+* https://www.home-assistant.io/integrations/[Home Assistant Integrations]
+* https://hacs.xyz/docs/publish/integration[HACS Integration Documentation]
+* https://docs.python.org/3/[Python Documentation]

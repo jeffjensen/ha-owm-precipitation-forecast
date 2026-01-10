@@ -1,0 +1,691 @@
+= Usage Examples
+:toc:
+:toclevels: 3
+:icons: font
+
+Comprehensive examples for using OWM Precipitation Forecast in your Home Assistant setup.
+
+== Dashboard Cards
+
+=== Basic Display Cards
+
+==== Simple Entities Card
+
+[source,yaml]
+----
+type: entities
+title: Today's Precipitation
+entities:
+  - entity: sensor.owm_precipitation_forecast_home_hourly_rain
+    name: Next Hour Rain
+    secondary_info: last-updated
+  - entity: sensor.owm_precipitation_forecast_home_hourly_snow
+    name: Next Hour Snow
+    secondary_info: last-updated
+  - entity: sensor.owm_precipitation_forecast_home_daily_rain
+    name: Today's Rain Total
+  - entity: sensor.owm_precipitation_forecast_home_daily_snow
+    name: Today's Snow Total
+----
+
+==== Glance Card with Icons
+
+[source,yaml]
+----
+type: glance
+title: Precipitation Forecast
+columns: 4
+entities:
+  - entity: sensor.owm_precipitation_forecast_home_hourly_rain
+    name: Hour
+    icon: mdi:weather-rainy
+  - entity: sensor.owm_precipitation_forecast_home_next24h_rain
+    name: 24h
+    icon: mdi:weather-pouring
+  - entity: sensor.owm_precipitation_forecast_home_hourly_snow
+    name: Hour
+    icon: mdi:weather-snowy
+  - entity: sensor.owm_precipitation_forecast_home_next24h_snow
+    name: 24h
+    icon: mdi:weather-snowy-heavy
+----
+
+==== Conditional Card (Show Only When Precipitation Expected)
+
+[source,yaml]
+----
+type: conditional
+conditions:
+  - entity: sensor.owm_precipitation_forecast_home_next24h_rain
+    state_not: "0.0"
+card:
+  type: markdown
+  content: >
+    ## ⚠️ Rain Alert
+
+
+    **{{ states('sensor.owm_precipitation_forecast_home_next24h_rain') }} inches**
+    of rain expected in the next 24 hours.
+
+
+    Bring an umbrella!
+----
+
+=== Chart Visualizations
+
+==== ApexCharts - Hourly Rain Forecast
+
+[source,yaml]
+----
+type: custom:apexcharts-card
+header:
+  title: Hourly Rain Forecast
+  show: true
+  show_states: true
+  colorize_states: true
+graph_span: 24h
+span:
+  start: hour
+series:
+  - entity: sensor.owm_precipitation_forecast_home_next24h_rain
+    name: Rain
+    type: column
+    data_generator: |
+      return entity.attributes.hourly_breakdown.map(h => {
+        return [new Date(h.time).getTime(), h.rain];
+      });
+    show:
+      legend_value: false
+yaxis:
+  - min: 0
+    apex_config:
+      tickAmount: 4
+      labels:
+        formatter: |
+          EVAL:function(value) {
+            return value.toFixed(2) + ' in';
+          }
+----
+
+==== ApexCharts - Daily Snow Forecast
+
+[source,yaml]
+----
+type: custom:apexcharts-card
+header:
+  title: 7-Day Snow Forecast
+  show: true
+series:
+  - entity: sensor.owm_precipitation_forecast_home_daily_snow
+    name: Snow
+    type: column
+    color: '#03A9F4'
+    data_generator: |
+      return entity.attributes.daily_breakdown.map(d => {
+        return [new Date(d.date).getTime(), d.snow];
+      });
+yaxis:
+  - min: 0
+    apex_config:
+      labels:
+        formatter: |
+          EVAL:function(value) {
+            return value.toFixed(1) + ' in';
+          }
+----
+
+==== Combined Rain and Snow Chart
+
+[source,yaml]
+----
+type: custom:apexcharts-card
+header:
+  title: Next 24 Hours - Rain & Snow
+  show: true
+graph_span: 24h
+series:
+  - entity: sensor.owm_precipitation_forecast_home_next24h_rain
+    name: Rain
+    type: column
+    color: '#2196F3'
+    data_generator: |
+      return entity.attributes.hourly_breakdown.map(h => {
+        return [new Date(h.time).getTime(), h.rain];
+      });
+  - entity: sensor.owm_precipitation_forecast_home_next24h_snow
+    name: Snow
+    type: column
+    color: '#BBDEFB'
+    data_generator: |
+      return entity.attributes.hourly_breakdown.map(h => {
+        return [new Date(h.time).getTime(), h.snow];
+      });
+----
+
+=== Advanced Dashboard Layouts
+
+==== Vertical Stack - Complete Weather Panel
+
+[source,yaml]
+----
+type: vertical-stack
+cards:
+  - type: markdown
+    content: >
+      # 🌦️ Precipitation Forecast
+      
+      **Location:** {{ state_attr('sensor.owm_precipitation_forecast_home_hourly_rain', 'location') }}
+      
+      **Last Update:** {{ relative_time(states.sensor.owm_precipitation_forecast_home_health.last_updated) }}
+  
+  - type: glance
+    title: Quick Overview
+    entities:
+      - sensor.owm_precipitation_forecast_home_hourly_rain
+      - sensor.owm_precipitation_forecast_home_hourly_snow
+      - sensor.owm_precipitation_forecast_home_next24h_rain
+      - sensor.owm_precipitation_forecast_home_next24h_snow
+  
+  - type: entities
+    title: Detailed Forecast
+    entities:
+      - entity: sensor.owm_precipitation_forecast_home_daily_rain
+        name: Today's Rain
+        icon: mdi:weather-rainy
+      - entity: sensor.owm_precipitation_forecast_home_daily_snow
+        name: Today's Snow
+        icon: mdi:weather-snowy
+      - type: divider
+      - entity: sensor.owm_precipitation_forecast_home_health
+        name: Integration Status
+        secondary_info: last-updated
+  
+  - type: button
+    name: Refresh Forecast
+    icon: mdi:refresh
+    tap_action:
+      action: call-service
+      service: owm_precipitation_forecast.update_forecast
+----
+
+==== Grid Layout - Multi-Location Dashboard
+
+[source,yaml]
+----
+type: grid
+columns: 2
+square: false
+cards:
+  - type: vertical-stack
+    title: Home
+    cards:
+      - type: gauge
+        entity: sensor.owm_precipitation_forecast_home_next24h_rain
+        min: 0
+        max: 2
+        name: Rain (24h)
+        severity:
+          green: 0
+          yellow: 0.5
+          red: 1.5
+      - type: gauge
+        entity: sensor.owm_precipitation_forecast_home_next24h_snow
+        min: 0
+        max: 10
+        name: Snow (24h)
+        severity:
+          green: 0
+          yellow: 3
+          red: 6
+  
+  - type: vertical-stack
+    title: Cabin
+    cards:
+      - type: gauge
+        entity: sensor.owm_precipitation_forecast_cabin_next24h_rain
+        min: 0
+        max: 2
+        name: Rain (24h)
+      - type: gauge
+        entity: sensor.owm_precipitation_forecast_cabin_next24h_snow
+        min: 0
+        max: 10
+        name: Snow (24h)
+----
+
+== Automations
+
+=== Precipitation Alerts
+
+==== Heavy Rain Warning
+
+[source,yaml]
+----
+automation:
+  - alias: "Heavy Rain Alert"
+    description: "Alert when significant rain is forecast"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_next24h_rain
+        above: 1.5  # More than 1.5 inches
+    condition:
+      - condition: time
+        after: "07:00:00"
+        before: "22:00:00"  # Only during waking hours
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "⛈️ Heavy Rain Expected"
+          message: >
+            {{ states('sensor.owm_precipitation_forecast_home_next24h_rain') }}
+            inches of rain forecast in the next 24 hours.
+            Consider:
+            - Checking drainage
+            - Moving vehicles
+            - Securing outdoor items
+          data:
+            priority: high
+            ttl: 0
+----
+
+==== Snow Day Notification
+
+[source,yaml]
+----
+automation:
+  - alias: "Significant Snowfall Alert"
+    description: "Alert when major snow is forecast"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_next24h_snow
+        above: 6.0  # More than 6 inches
+    action:
+      - service: notify.family
+        data:
+          title: "❄️ Snow Day Incoming!"
+          message: >
+            {{ states('sensor.owm_precipitation_forecast_home_next24h_snow') }}
+            inches of snow forecast.
+            
+            Prepare:
+            - Check snow removal equipment
+            - Stock up on supplies
+            - Plan for travel delays
+      
+      - service: script.prepare_for_snow
+      
+      - service: calendar.create_event
+        data:
+          summary: "Snow Day - Check forecast"
+          start_date_time: "{{ now().replace(hour=7, minute=0) + timedelta(days=1) }}"
+          end_date_time: "{{ now().replace(hour=8, minute=0) + timedelta(days=1) }}"
+----
+
+==== Light Precipitation Reminder
+
+[source,yaml]
+----
+automation:
+  - alias: "Light Rain Reminder"
+    description: "Remind about rain before leaving"
+    trigger:
+      - platform: time
+        at: "07:30:00"
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_next24h_rain
+        above: 0.1  # Any measurable rain
+    action:
+      - service: tts.google_translate_say
+        data:
+          entity_id: media_player.kitchen_speaker
+          message: >
+            Good morning! There's 
+            {{ states('sensor.owm_precipitation_forecast_home_next24h_rain') }}
+            inches of rain expected today. Don't forget your umbrella!
+----
+
+=== Automated Actions
+
+==== Close Windows When Rain Expected
+
+[source,yaml]
+----
+automation:
+  - alias: "Auto Close Windows - Rain Expected"
+    description: "Close windows when rain is forecast"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_hourly_rain
+        above: 0.1  # Any measurable rain
+    condition:
+      - condition: state
+        entity_id: binary_sensor.bedroom_window
+        state: "on"  # Window is open
+      - condition: state
+        entity_id: input_boolean.vacation_mode
+        state: "off"  # Not on vacation
+    action:
+      - service: cover.close_cover
+        target:
+          entity_id: cover.bedroom_window
+      
+      - service: notify.mobile_app
+        data:
+          message: "Closed bedroom window - rain expected in next hour"
+----
+
+==== Adjust Sprinkler Schedule
+
+[source,yaml]
+----
+automation:
+  - alias: "Skip Sprinklers if Rain Expected"
+    description: "Skip sprinkler schedule if rain forecast"
+    trigger:
+      - platform: time
+        at: "06:00:00"  # Check before scheduled sprinkler time
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_daily_rain
+        above: 0.25  # Significant rain expected
+    action:
+      - service: switch.turn_off
+        target:
+          entity_id: switch.sprinkler_system
+      
+      - service: notify.home_owner
+        data:
+          message: >
+            Sprinklers skipped today - 
+            {{ states('sensor.owm_precipitation_forecast_home_daily_rain') }}
+            inches of rain expected.
+----
+
+==== Prepare for Snow - Automated
+
+[source,yaml]
+----
+automation:
+  - alias: "Prepare for Snow - Evening Check"
+    description: "Automated snow preparation"
+    trigger:
+      - platform: time
+        at: "18:00:00"
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_next24h_snow
+        above: 3.0
+    action:
+      # Turn on driveway heat
+      - service: switch.turn_on
+        target:
+          entity_id: switch.driveway_heating
+      
+      # Notify family
+      - service: notify.family
+        data:
+          title: "Snow Preparation Active"
+          message: >
+            {{ states('sensor.owm_precipitation_forecast_home_next24h_snow') }}
+            inches of snow expected. Driveway heating activated.
+      
+      # Set thermostat higher
+      - service: climate.set_temperature
+        data:
+          entity_id: climate.house
+          temperature: 72
+----
+
+=== Daily/Weekly Reports
+
+==== Morning Weather Brief
+
+[source,yaml]
+----
+automation:
+  - alias: "Morning Weather Brief"
+    description: "Daily precipitation forecast summary"
+    trigger:
+      - platform: time
+        at: "07:00:00"
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "☀️ Morning Weather Brief"
+          message: >
+            {% set rain = states('sensor.owm_precipitation_forecast_home_daily_rain') | float %}
+            {% set snow = states('sensor.owm_precipitation_forecast_home_daily_snow') | float %}
+            
+            **Today's Forecast:**
+            
+            {% if rain > 0 %}
+            🌧️ Rain: {{ rain }} inches
+            {% endif %}
+            
+            {% if snow > 0 %}
+            ❄️ Snow: {{ snow }} inches
+            {% endif %}
+            
+            {% if rain == 0 and snow == 0 %}
+            ☀️ No precipitation expected
+            {% endif %}
+            
+            Have a great day!
+----
+
+==== Weekly Precipitation Summary
+
+[source,yaml]
+----
+automation:
+  - alias: "Weekly Precipitation Summary"
+    description: "Sunday evening forecast summary"
+    trigger:
+      - platform: time
+        at: "19:00:00"
+    condition:
+      - condition: time
+        weekday: sun
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "📊 Week Ahead Forecast"
+          message: >
+            {% set daily_rain = state_attr('sensor.owm_precipitation_forecast_home_daily_rain', 'daily_breakdown') %}
+            {% set daily_snow = state_attr('sensor.owm_precipitation_forecast_home_daily_snow', 'daily_breakdown') %}
+            
+            **7-Day Precipitation Forecast:**
+            
+            {% for day in daily_rain[:7] %}
+            {{ (day.date | as_datetime).strftime('%A') }}: 
+            {{ day.rain }}in rain, 
+            {{ daily_snow[loop.index0].snow }}in snow
+            {% endfor %}
+----
+
+=== Health Monitoring
+
+==== Integration Error Alert
+
+[source,yaml]
+----
+automation:
+  - alias: "Weather Integration Error"
+    description: "Alert when integration has errors"
+    trigger:
+      - platform: state
+        entity_id: sensor.owm_precipitation_forecast_home_health
+        to: "error"
+        for:
+          minutes: 5
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "⚠️ Weather Integration Error"
+          message: >
+            The precipitation forecast integration is experiencing errors:
+            
+            {{ state_attr('sensor.owm_precipitation_forecast_home_health', 'last_error') }}
+            
+            Error Count: {{ state_attr('sensor.owm_precipitation_forecast_home_health', 'error_count') }}
+            
+            Check your API key and internet connection.
+          notification_id: "weather_integration_error"
+----
+
+==== API Usage Warning
+
+[source,yaml]
+----
+automation:
+  - alias: "API Usage Warning"
+    description: "Warn when approaching API limit"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_health
+        value_template: "{{ state.attributes.api_calls_remaining }}"
+        below: 100
+    action:
+      - service: notify.home_owner
+        data:
+          title: "API Limit Warning"
+          message: >
+            Only {{ state_attr('sensor.owm_precipitation_forecast_home_health', 'api_calls_remaining') }}
+            API calls remaining today.
+            
+            Consider increasing polling interval.
+----
+
+== Template Sensors
+
+=== Custom Calculations
+
+==== Precipitation Likelihood Sensor
+
+[source,yaml]
+----
+template:
+  - sensor:
+      - name: "Precipitation Likely Today"
+        unique_id: precipitation_likely_today
+        state: >
+          {% set rain = states('sensor.owm_precipitation_forecast_home_daily_rain') | float %}
+          {% set snow = states('sensor.owm_precipitation_forecast_home_daily_snow') | float %}
+          {% if rain > 0.1 or snow > 0.5 %}
+            Yes
+          {% else %}
+            No
+          {% endif %}
+        icon: >
+          {% set rain = states('sensor.owm_precipitation_forecast_home_daily_rain') | float %}
+          {% set snow = states('sensor.owm_precipitation_forecast_home_daily_snow') | float %}
+          {% if snow > 0.5 %}
+            mdi:weather-snowy
+          {% elif rain > 0.1 %}
+            mdi:weather-rainy
+          {% else %}
+            mdi:weather-sunny
+          {% endif %}
+----
+
+==== Total Precipitation Sensor
+
+[source,yaml]
+----
+template:
+  - sensor:
+      - name: "Total Precipitation Today"
+        unique_id: total_precipitation_today
+        unit_of_measurement: "in"
+        state: >
+          {% set rain = states('sensor.owm_precipitation_forecast_home_daily_rain') | float %}
+          {% set snow_liquid = states('sensor.owm_precipitation_forecast_home_daily_snow') | float / 10 %}
+          {{ (rain + snow_liquid) | round(2) }}
+----
+
+== Scripts
+
+=== Manual Refresh Script
+
+[source,yaml]
+----
+script:
+  refresh_precipitation_forecast:
+    alias: "Refresh Precipitation Forecast"
+    icon: mdi:refresh
+    sequence:
+      - service: owm_precipitation_forecast.update_forecast
+      - delay:
+          seconds: 5
+      - service: notify.mobile_app
+        data:
+          message: "Precipitation forecast updated"
+----
+
+=== Comprehensive Weather Check Script
+
+[source,yaml]
+----
+script:
+  check_weather_conditions:
+    alias: "Check Weather Conditions"
+    icon: mdi:weather-partly-cloudy
+    sequence:
+      - service: owm_precipitation_forecast.update_forecast
+      
+      - wait_template: "{{ states('sensor.owm_precipitation_forecast_home_health') == 'ok' }}"
+        timeout: "00:00:30"
+      
+      - service: notify.mobile_app
+        data:
+          title: "Current Weather Check"
+          message: >
+            **Next Hour:**
+            Rain: {{ states('sensor.owm_precipitation_forecast_home_hourly_rain') }}in
+            Snow: {{ states('sensor.owm_precipitation_forecast_home_hourly_snow') }}in
+            
+            **Next 24 Hours:**
+            Rain: {{ states('sensor.owm_precipitation_forecast_home_next24h_rain') }}in
+            Snow: {{ states('sensor.owm_precipitation_forecast_home_next24h_snow') }}in
+----
+
+== Mobile App Notifications
+
+=== Actionable Notifications
+
+[source,yaml]
+----
+automation:
+  - alias: "Rain Alert with Actions"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.owm_precipitation_forecast_home_hourly_rain
+        above: 0.5
+    action:
+      - service: notify.mobile_app
+        data:
+          title: "Heavy Rain in Next Hour"
+          message: "{{ states('sensor.owm_precipitation_forecast_home_hourly_rain') }}in expected"
+          data:
+            actions:
+              - action: "CLOSE_WINDOWS"
+                title: "Close Windows"
+              - action: "REMIND_LATER"
+                title: "Remind in 30min"
+  
+  - alias: "Handle Rain Alert Actions"
+    trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "CLOSE_WINDOWS"
+    action:
+      - service: cover.close_cover
+        target:
+          entity_id: all
+----
+
+---
+
+*Last Updated: January 2024*

@@ -1,0 +1,608 @@
+= Build Documentation
+:toc:
+:toclevels: 3
+:icons: font
+
+== Overview
+
+This document describes how to build the OWM Precipitation Forecast integration for Home Assistant.
+
+== Prerequisites
+
+Before building, ensure you have:
+
+* Completed the link:DEVELOPMENT_SETUP.adoc[Development Environment Setup]
+* Activated your virtual environment
+* All dependencies installed
+
+== Build Script
+
+The project includes a comprehensive build script that runs all quality checks and builds the package.
+
+=== Location
+
+[source]
+----
+scripts/build.py
+----
+
+=== Usage
+
+==== Run All Checks
+
+Run all quality checks and build the package:
+
+[source,bash]
+----
+python scripts/build.py --all
+----
+
+This executes:
+
+1. Code formatting (Black + isort)
+2. Linting (Ruff + Pylint)
+3. Type checking (MyPy)
+4. Security scanning (Bandit)
+5. Tests with coverage (pytest)
+6. Manifest validation
+7. Package build
+
+==== Run Specific Checks
+
+Run individual quality checks:
+
+[source,bash]
+----
+# Format code only
+python scripts/build.py --format
+
+# Lint code only
+python scripts/build.py --lint
+
+# Type check only
+python scripts/build.py --type-check
+
+# Security check only
+python scripts/build.py --security
+
+# Run tests only
+python scripts/build.py --test
+
+# Validate manifest only
+python scripts/build.py --validate
+
+# Build package only
+python scripts/build.py --build
+----
+
+==== Test Options
+
+Control test execution:
+
+[source,bash]
+----
+# Run tests without coverage
+python scripts/build.py --test --no-coverage
+
+# Run only unit tests
+python scripts/build.py --test --test-markers unit
+
+# Run only integration tests
+python scripts/build.py --test --test-markers integration
+
+# Run only advanced scenario tests
+python scripts/build.py --test --test-markers advanced
+----
+
+=== Build Output
+
+The build script provides colored output:
+
+* 🟢 *Green* - Success
+* 🔴 *Red* - Failure
+* 🔵 *Blue* - Information
+* 🟡 *Yellow* - Warnings
+
+Example output:
+
+[source]
+----
+================================================================================
+FORMATTING CODE
+================================================================================
+
+Running: black .
+All done! ✨ 🍰 ✨
+✓ Black formatting completed successfully
+
+Running: isort .
+✓ Import sorting completed successfully
+
+================================================================================
+BUILD SUMMARY
+================================================================================
+
+FORMAT: ✓ PASSED
+LINT: ✓ PASSED
+TYPE_CHECK: ✓ PASSED
+SECURITY: ✓ PASSED
+TEST: ✓ PASSED
+VALIDATE: ✓ PASSED
+BUILD: ✓ PASSED
+
+🎉 All checks passed!
+----
+
+== Build Steps Explained
+
+=== 1. Code Formatting
+
+Ensures consistent code style across the project.
+
+==== Black
+
+Formats Python code according to PEP 8 and Black's opinionated style.
+
+[source,bash]
+----
+black .
+----
+
+Configuration in `pyproject.toml`:
+
+* Line length: 100 characters
+* Target: Python 3.11
+
+==== isort
+
+Organizes and sorts imports.
+
+[source,bash]
+----
+isort .
+----
+
+Configuration compatible with Black.
+
+=== 2. Linting
+
+Identifies code quality issues, potential bugs, and style violations.
+
+==== Ruff
+
+Fast Python linter with multiple rule sets.
+
+[source,bash]
+----
+ruff check .
+----
+
+Checks for:
+
+* Syntax errors
+* Code smells
+* Security issues
+* Performance issues
+* Best practices
+
+==== Pylint
+
+Comprehensive Python linter.
+
+[source,bash]
+----
+pylint custom_components/owm_precipitation_forecast
+----
+
+Checks for:
+
+* Code quality
+* Convention violations
+* Refactoring opportunities
+* Errors and warnings
+
+=== 3. Type Checking
+
+Verifies type annotations and catches type-related errors.
+
+==== MyPy
+
+Static type checker for Python.
+
+[source,bash]
+----
+mypy custom_components/owm_precipitation_forecast
+----
+
+Runs in strict mode to ensure:
+
+* All functions have type annotations
+* No implicit `Any` types
+* Proper type usage
+
+=== 4. Security Scanning
+
+Identifies security vulnerabilities in the code.
+
+==== Bandit
+
+Security linter for Python.
+
+[source,bash]
+----
+bandit -r custom_components/owm_precipitation_forecast
+----
+
+Scans for:
+
+* SQL injection
+* Shell injection
+* Hardcoded passwords
+* Insecure cryptography
+* Other security issues
+
+=== 5. Testing
+
+Runs comprehensive test suite with coverage analysis.
+
+==== Pytest
+
+Test framework with plugins for async and coverage.
+
+[source,bash]
+----
+pytest tests --cov=custom_components.owm_precipitation_forecast --cov-report=html
+----
+
+Test categories:
+
+* *Unit tests* (`-m unit`) - Test individual components
+* *Integration tests* (`-m integration`) - Test component interactions
+* *Advanced tests* (`-m advanced`) - Test complex scenarios
+
+Coverage reports generated in `htmlcov/index.html`.
+
+=== 6. Manifest Validation
+
+Validates the Home Assistant manifest file.
+
+[source,bash]
+----
+python scripts/validate_manifest.py
+----
+
+Checks:
+
+* Required fields present
+* Valid domain name
+* Semantic versioning
+* Valid URLs
+* Proper codeowners format
+* Valid IoT class
+
+=== 7. Package Build
+
+Creates distributable packages.
+
+[source,bash]
+----
+python -m build
+----
+
+Generates:
+
+* Wheel package (`.whl`)
+* Source distribution (`.tar.gz`)
+
+Output in `dist/` directory.
+
+== Manual Build Steps
+
+You can also run build steps manually:
+
+=== Format Code
+
+[source,bash]
+----
+black .
+isort .
+----
+
+=== Lint Code
+
+[source,bash]
+----
+ruff check .
+pylint custom_components/owm_precipitation_forecast
+----
+
+Fix automatic issues:
+
+[source,bash]
+----
+ruff check --fix .
+----
+
+=== Type Check
+
+[source,bash]
+----
+mypy custom_components/owm_precipitation_forecast
+----
+
+=== Run Tests
+
+[source,bash]
+----
+# All tests
+pytest tests -v
+
+# With coverage
+pytest tests --cov --cov-report=html
+
+# Specific test file
+pytest tests/test_config_flow.py -v
+
+# Specific test
+pytest tests/test_config_flow.py::TestConfigFlow::test_user_flow -v
+----
+
+=== Validate Manifest
+
+[source,bash]
+----
+python scripts/validate_manifest.py
+----
+
+=== Build Package
+
+[source,bash]
+----
+python -m build
+----
+
+== CI/CD Pipeline
+
+The project includes automated CI/CD pipelines using GitHub Actions.
+
+=== CI Pipeline
+
+Runs on every push and pull request.
+
+==== Workflow File
+
+`.github/workflows/ci.yml`
+
+==== Jobs
+
+1. *Lint* - Formatting, linting, type checking, security
+2. *Test* - Tests on Python 3.11 and 3.12
+3. *Validate* - Manifest and HACS validation
+4. *Build* - Package build
+5. *Docs* - Documentation validation
+
+==== Viewing Results
+
+1. Go to GitHub repository
+2. Click "Actions" tab
+3. Select workflow run
+4. View job results
+
+=== Release Pipeline
+
+Runs when a version tag is pushed.
+
+==== Workflow File
+
+`.github/workflows/release.yml`
+
+==== Jobs
+
+1. *Validate* - All quality checks
+2. *Build* - Create release artifacts
+3. *Release* - Create GitHub release
+
+==== Creating a Release
+
+[source,bash]
+----
+# Update version in files
+# - custom_components/owm_precipitation_forecast/manifest.json
+# - pyproject.toml
+
+# Commit changes
+git add .
+git commit -m "Bump version to 1.0.0"
+git push
+
+# Create and push tag
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+----
+
+The release pipeline automatically:
+
+* Runs all quality checks
+* Builds packages
+* Creates GitHub release with artifacts
+* Publishes release notes
+
+== Build Artifacts
+
+=== Local Artifacts
+
+After a successful build:
+
+[source]
+----
+dist/
+├── ha_owm_precipitation_forecast-1.0.0-py3-none-any.whl
+└── ha_owm_precipitation_forecast-1.0.0.tar.gz
+
+htmlcov/
+└── index.html  # Coverage report
+
+.coverage  # Coverage data
+coverage.xml  # Coverage XML report
+----
+
+=== Release Artifacts
+
+GitHub releases include:
+
+* `owm-precipitation-forecast.zip` - HACS-compatible archive
+* Source distribution
+* Wheel package
+* Release notes from CHANGELOG.md
+
+== Build Requirements
+
+=== Python Version
+
+* Minimum: Python 3.11
+* Tested on: Python 3.11, 3.12
+
+=== Dependencies
+
+All dependencies specified in `pyproject.toml`:
+
+==== Runtime
+
+* `aiohttp>=3.9.0`
+* `homeassistant>=2024.1.0`
+
+==== Development
+
+* `pytest>=7.4.3`
+* `pytest-asyncio>=0.23.2`
+* `pytest-cov>=4.1.0`
+* `black>=23.12.0`
+* `isort>=5.13.2`
+* `pylint>=3.0.3`
+* `mypy>=1.7.1`
+* `ruff>=0.1.8`
+* `bandit>=1.7.5`
+
+== Troubleshooting
+
+=== Build Fails
+
+==== Problem: Formatting Issues
+
+[source,bash]
+----
+# Fix automatically
+black .
+isort .
+----
+
+==== Problem: Linting Errors
+
+[source,bash]
+----
+# Show all issues
+ruff check .
+
+# Fix automatic issues
+ruff check --fix .
+
+# Remaining issues need manual fixes
+----
+
+==== Problem: Type Errors
+
+[source,bash]
+----
+# Run MyPy with verbose output
+mypy custom_components/owm_precipitation_forecast --show-error-codes
+
+# Fix by adding type annotations
+----
+
+==== Problem: Test Failures
+
+[source,bash]
+----
+# Run with verbose output
+pytest tests -v -s
+
+# Run specific failing test
+pytest tests/test_file.py::test_name -v -s
+
+# Clear cache and retry
+rm -rf .pytest_cache
+pytest tests -v
+----
+
+=== Coverage Too Low
+
+If coverage is below target:
+
+[source,bash]
+----
+# Generate detailed coverage report
+pytest --cov --cov-report=html --cov-report=term-missing
+
+# Open HTML report
+open htmlcov/index.html
+
+# Identify uncovered lines and add tests
+----
+
+=== Manifest Validation Fails
+
+[source,bash]
+----
+# Run validation
+python scripts/validate_manifest.py
+
+# Check error messages
+# Fix manifest.json accordingly
+----
+
+== Best Practices
+
+=== Before Committing
+
+Always run:
+
+[source,bash]
+----
+python scripts/build.py --all
+----
+
+This ensures code quality and prevents CI failures.
+
+=== During Development
+
+Run frequently:
+
+[source,bash]
+----
+# Quick checks
+python scripts/build.py --format --lint
+
+# Run tests often
+python scripts/build.py --test
+----
+
+=== Before Creating PR
+
+1. Run full build
+2. Check coverage report
+3. Update documentation if needed
+4. Update CHANGELOG.md
+
+== Next Steps
+
+* Review link:TESTING.adoc[Testing Documentation]
+* Check link:../CONTRIBUTING.adoc[Contributing Guidelines]
+* Read link:../README.adoc[Project README]
+
+== Additional Resources
+
+* https://black.readthedocs.io/[Black Documentation]
+* https://pycqa.github.io/isort/[isort Documentation]
+* https://docs.astral.sh/ruff/[Ruff Documentation]
+* https://mypy.readthedocs.io/[MyPy Documentation]
+* https://docs.pytest.org/[Pytest Documentation]
