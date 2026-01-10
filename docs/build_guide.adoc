@@ -1,0 +1,8 @@
+= Build System Guide
+:sectnums:
+
+== Overview
+
+Single Python script handles all build tasks:
+
+`python build.py all` → Complete verification pipeline

@@ -1,0 +1,29 @@
+{
+    "title": "OWM Precipitation Forecast",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configure OWM Precipitation Forecast",
+                "description": "Enter your OpenWeatherMap API key and location.",
+                "data": {
+                    "api_key": "OpenWeatherMap API Key",
+                    "location": "Location (city or lat,lon)",
+                    "snow_ratio": "Snow ratio (mm water = cm snow)"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Invalid API key"
+        },
+        "options": {
+            "step": {
+                "init": {
+                    "title": "Configure OWM Precipitation Forecast",
+                    "data": {
+                        "snow_ratio": "Snow ratio (mm water = cm snow)"
+                    }
+                }
+            }
+        }
+    }
+}

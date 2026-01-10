@@ -1,0 +1,13 @@
+= Testing Guide
+:sectnums:
+
+== Running Tests
+
+`python build.py test`
+`python build.py coverage`
+
+== Fixtures
+
+* `mock_hass`
+* `mock_config_entry`
+* `mock_aiohttp_session`

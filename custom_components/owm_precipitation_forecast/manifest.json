@@ -1,0 +1,14 @@
+{
+    "domain": "owm_precipitation_forecast",
+    "name": "OWM Precipitation Forecast",
+    "config_flow": true,
+    "documentation": "https://github.com/yourusername/owm_precipitation_forecast",
+    "requirements": [],
+    "dependencies": [],
+    "codeowners": [
+        "@yourusername"
+    ],
+    "iot_class": "cloud_polling",
+    "version": "0.1.0",
+    "issue_tracker": "https://github.com/yourusername/owm_precipitation_forecast/issues"
+}

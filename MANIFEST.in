@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+recursive-include custom_components *.py *.json *.md *.adoc
+recursive-include docs *.adoc
+recursive-include tests *.py
+recursive-include .github *.yml
+include requirements*.txt
+include *.toml *.ini *.py

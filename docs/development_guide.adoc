@@ -1,0 +1,16 @@
+= Development Guide
+:sectnums:
+:imagesdir: images
+
+== Prerequisites
+
+* Python 3.11+
+* Home Assistant 2024.1.0+
+* Git
+
+== Setup
+
+. Clone repository
+. Create virtual environment
+. Install dependencies
+. Run build system
