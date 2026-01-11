@@ -54,7 +54,6 @@ OWM Precipitation Forecast is a professional Home Assistant integration that pro
 
 === Requirements
 
-* Home Assistant 2024.1.0 or later
 * OpenWeatherMap API key (free tier available at openweathermap.org)
 * Internet connectivity for API calls
 
